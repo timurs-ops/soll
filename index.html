@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Расписание занятий</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -11,6 +11,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
         .container { max-width: 480px; margin: 0 auto; }
         .header {
@@ -28,6 +29,7 @@
             gap: 10px;
             margin-bottom: 20px;
             padding-bottom: 10px;
+            scroll-behavior: smooth;
         }
         .day-btn {
             flex-shrink: 0;
@@ -52,7 +54,9 @@
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
         }
+        .schedule.swiping { transition: none; }
         .lesson-card {
             background: #f8f9fa;
             border-radius: 15px;
@@ -82,13 +86,22 @@
             align-items: center;
             margin-bottom: 10px;
         }
+        .lesson-number-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         .lesson-number {
-            background: #667eea;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 10px;
-            font-size: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
             font-weight: bold;
+            color: white;
+            flex-shrink: 0;
         }
         .lesson-time { color: #666; font-size: 13px; }
         .lesson-name { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; }
@@ -106,18 +119,14 @@
         .status-current { background: #28a745; color: white; }
         .status-next { background: #ffc107; color: #333; }
         .status-upcoming { background: #e9ecef; color: #666; }
-        .color-indicator {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
         .no-lessons { text-align: center; padding: 40px 20px; color: #666; }
         .no-lessons .emoji { font-size: 48px; margin-bottom: 10px; }
+        .swipe-hint {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            margin-top: 15px;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -180,6 +189,7 @@
         </div>
         <div class="days-nav" id="daysNav"></div>
         <div class="schedule" id="schedule"></div>
+        <div class="swipe-hint">👈 Свайпни для переключения дня 👉</div>
     </div>
     <div class="modal" id="colorModal">
         <div class="modal-content">
@@ -229,6 +239,7 @@
         let currentDay = new Date().getDay();
         currentDay = currentDay === 0 ? 6 : currentDay - 1;
         let selectedLesson = null;
+
         function loadColors() { const s = localStorage.getItem('lessonColors'); return s ? JSON.parse(s) : {}; }
         function saveColors(c) { localStorage.setItem('lessonColors', JSON.stringify(c)); }
         function parseTime(t) {
@@ -253,6 +264,11 @@
                 b.onclick = () => { currentDay = i; renderDaysNav(); renderSchedule(); };
                 nav.appendChild(b);
             });
+            // Прокручиваем активную кнопку в видимую область
+            setTimeout(() => {
+                const activeBtn = nav.querySelector('.day-btn.active');
+                if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }, 50);
         }
         function renderSchedule() {
             const div = document.getElementById('schedule');
@@ -263,25 +279,33 @@
                 div.innerHTML = '<div class="no-lessons"><div class="emoji">🎉</div><div>Выходной день!</div></div>';
                 return;
             }
-            const now = new Date().getTime();
+            const now = new Date();
+            const todayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
+            const isToday = currentDay === todayIndex;
             let html = '';
             lessons.forEach((lesson, index) => {
                 const times = parseTime(lesson.time);
                 let status = '', cardClass = '';
                 const colorKey = dayName + '-' + lesson.name;
                 const lessonColor = lc[colorKey] || '#667eea';
-                if (now >= times.start && now <= times.end) {
+                if (isToday && now.getTime() >= times.start && now.getTime() <= times.end) {
                     status = '<span class="status-badge status-current">Идёт сейчас</span>';
                     cardClass = 'current';
-                } else if (now < times.start && (index === 0 || now > parseTime(lessons[index-1].time).end)) {
+                } else if (isToday && now.getTime() < times.start &&
+                           (index === 0 || now.getTime() > parseTime(lessons[index-1].time).end)) {
                     status = '<span class="status-badge status-next">Следующая пара</span>';
                     cardClass = 'next';
                 } else {
                     status = '<span class="status-badge status-upcoming">Предстоит</span>';
                 }
+                // Кружок цвета теперь содержит номер пары — ничего не перекрывает
                 html += '<div class="lesson-card ' + cardClass + '" style="border-left-color:' + lessonColor + '" onclick="openColorModal(\'' + colorKey + '\',\'' + lessonColor + '\')">' +
-                    '<div class="color-indicator" style="background:' + lessonColor + '"></div>' +
-                    '<div class="lesson-header"><span class="lesson-number">Пара ' + (index+1) + '</span><span class="lesson-time">' + lesson.time + '</span></div>' +
+                    '<div class="lesson-header">' +
+                        '<div class="lesson-number-wrap">' +
+                            '<div class="lesson-number" style="background:' + lessonColor + '">' + (index+1) + '</div>' +
+                            '<span class="lesson-time">' + lesson.time + '</span>' +
+                        '</div>' +
+                    '</div>' +
                     '<div class="lesson-name">' + lesson.name + '</div>' +
                     '<div class="lesson-details"><div class="detail-item"><span class="icon">🚪</span><span>' + lesson.room + '</span></div>' +
                     '<div class="detail-item"><span class="icon">👨‍🏫</span><span>' + lesson.teacher + '</span></div></div>' + status + '</div>';
@@ -312,6 +336,68 @@
             document.getElementById('colorModal').classList.remove('active');
             selectedLesson = null;
         }
+
+        // ===== СВАЙП =====
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const scheduleEl = document.getElementById('schedule');
+
+        function handleSwipe() {
+            const diff = touchStartX - touchEndX;
+            const threshold = 50; // минимальное расстояние свайпа
+            if (Math.abs(diff) < threshold) return;
+            if (diff > 0 && currentDay < days.length - 1) {
+                // свайп влево → следующий день
+                currentDay++;
+            } else if (diff < 0 && currentDay > 0) {
+                // свайп вправо → предыдущий день
+                currentDay--;
+            } else {
+                return;
+            }
+            // Анимация
+            scheduleEl.classList.add('swiping');
+            scheduleEl.style.transform = diff > 0 ? 'translateX(-20px)' : 'translateX(20px)';
+            setTimeout(() => {
+                scheduleEl.style.transform = 'translateX(0)';
+                scheduleEl.classList.remove('swiping');
+            }, 50);
+            renderDaysNav();
+            renderSchedule();
+        }
+
+        // Тач-события (мобильные)
+        scheduleEl.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        scheduleEl.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        // Мышь (десктоп)
+        let mouseDown = false;
+        scheduleEl.addEventListener('mousedown', e => {
+            mouseDown = true;
+            touchStartX = e.screenX;
+        });
+        scheduleEl.addEventListener('mouseup', e => {
+            if (!mouseDown) return;
+            mouseDown = false;
+            touchEndX = e.screenX;
+            handleSwipe();
+        });
+        scheduleEl.addEventListener('mouseleave', () => { mouseDown = false; });
+
+        // Клавиатура (стрелки)
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' && currentDay < days.length - 1) {
+                currentDay++; renderDaysNav(); renderSchedule();
+            } else if (e.key === 'ArrowLeft' && currentDay > 0) {
+                currentDay--; renderDaysNav(); renderSchedule();
+            }
+        });
+
         updateCurrentTime();
         renderDaysNav();
         renderSchedule();
