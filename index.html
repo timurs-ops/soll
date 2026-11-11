@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание занятий</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 480px; margin: 0 auto; }
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header h1 { color: #333; font-size: 24px; margin-bottom: 10px; }
+        .current-time { color: #666; font-size: 14px; }
+        .days-nav {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        .day-btn {
+            flex-shrink: 0;
+            background: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .day-btn.active {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+        .schedule {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .lesson-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .lesson-card.current {
+            background: #e8f4f8;
+            border-left-color: #28a745;
+            animation: pulse 2s infinite;
+        }
+        .lesson-card.next {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .lesson-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .lesson-number {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .lesson-time { color: #666; font-size: 13px; }
+        .lesson-name { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; }
+        .lesson-details { display: flex; gap: 15px; flex-wrap: wrap; }
+        .detail-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #666; }
+        .detail-item .icon { font-size: 16px; }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .status-current { background: #28a745; color: white; }
+        .status-next { background: #ffc107; color: #333; }
+        .status-upcoming { background: #e9ecef; color: #666; }
+        .color-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .no-lessons { text-align: center; padding: 40px 20px; color: #666; }
+        .no-lessons .emoji { font-size: 48px; margin-bottom: 10px; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+        }
+        .modal-content h3 { margin-bottom: 20px; color: #333; text-align: center; }
+        .color-picker {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .color-option {
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            margin: 0 auto;
+        }
+        .color-option:hover { transform: scale(1.2); }
+        .color-option.selected { border-color: #333; transform: scale(1.1); }
+        .modal-close {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .header h1 { font-size: 20px; }
+            .lesson-name { font-size: 16px; }
+            .color-picker { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Расписание занятий</h1>
+            <div class="current-time" id="currentTime"></div>
+        </div>
+        <div class="days-nav" id="daysNav"></div>
+        <div class="schedule" id="schedule"></div>
+    </div>
+    <div class="modal" id="colorModal">
+        <div class="modal-content">
+            <h3>Выберите цвет предмета</h3>
+            <div class="color-picker" id="colorPicker"></div>
+            <button class="modal-close" onclick="closeModal()">Закрыть</button>
+        </div>
+    </div>
+    <script>
+        const schedule = {
+            'Понедельник': [
+                { time: '8:30-10:00', name: 'Математика', room: 'Каб. 120', teacher: 'Иванов И.И.' },
+                { time: '10:15-11:45', name: 'Физика', room: 'Каб. 205', teacher: 'Петров П.П.' },
+                { time: '12:00-13:30', name: 'Информатика', room: 'Каб. 310', teacher: 'Сидоров С.С.' },
+                { time: '13:45-15:15', name: 'Английский язык', room: 'Каб. 115', teacher: 'Смирнова А.А.' }
+            ],
+            'Вторник': [
+                { time: '8:30-10:00', name: 'История', room: 'Каб. 220', teacher: 'Козлов К.К.' },
+                { time: '10:15-11:45', name: 'Литература', room: 'Каб. 118', teacher: 'Новикова Н.Н.' },
+                { time: '12:00-13:30', name: 'Биология', room: 'Каб. 305', teacher: 'Морозов М.М.' }
+            ],
+            'Среда': [
+                { time: '8:30-10:00', name: 'Химия', room: 'Каб. 215', teacher: 'Волков В.В.' },
+                { time: '10:15-11:45', name: 'География', room: 'Каб. 208', teacher: 'Соколов С.С.' },
+                { time: '12:00-13:30', name: 'Физкультура', room: 'Спортзал', teacher: 'Лебедев Л.Л.' },
+                { time: '13:45-15:15', name: 'ОБЖ', room: 'Каб. 112', teacher: 'Попов П.П.' }
+            ],
+            'Четверг': [
+                { time: '8:30-10:00', name: 'Обществознание', room: 'Каб. 225', teacher: 'Васильев В.В.' },
+                { time: '10:15-11:45', name: 'Математика', room: 'Каб. 120', teacher: 'Иванов И.И.' },
+                { time: '12:00-13:30', name: 'Информатика', room: 'Каб. 310', teacher: 'Сидоров С.С.' }
+            ],
+            'Пятница': [
+                { time: '8:30-10:00', name: 'Физика', room: 'Каб. 205', teacher: 'Петров П.П.' },
+                { time: '10:15-11:45', name: 'Английский язык', room: 'Каб. 115', teacher: 'Смирнова А.А.' },
+                { time: '12:00-13:30', name: 'Литература', room: 'Каб. 118', teacher: 'Новикова Н.Н.' },
+                { time: '13:45-15:15', name: 'История', room: 'Каб. 220', teacher: 'Козлов К.К.' }
+            ],
+            'Суббота': [
+                { time: '8:30-10:00', name: 'Биология', room: 'Каб. 305', teacher: 'Морозов М.М.' },
+                { time: '10:15-11:45', name: 'Химия', room: 'Каб. 215', teacher: 'Волков В.В.' }
+            ],
+            'Воскресенье': []
+        };
+        const colors = ['#A8D8EA','#AA96DA','#FCBAD3','#FFFFD2','#A8E6CF','#FFD3B6','#D4A5A5','#B5EAD7','#C7CEEA','#F8B195','#E2F0CB','#FFDAC1'];
+        const days = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+        let currentDay = new Date().getDay();
+        currentDay = currentDay === 0 ? 6 : currentDay - 1;
+        let selectedLesson = null;
+        function loadColors() { const s = localStorage.getItem('lessonColors'); return s ? JSON.parse(s) : {}; }
+        function saveColors(c) { localStorage.setItem('lessonColors', JSON.stringify(c)); }
+        function parseTime(t) {
+            const [s,e] = t.split('-');
+            const [sh,sm] = s.split(':').map(Number);
+            const [eh,em] = e.split(':').map(Number);
+            return { start: new Date().setHours(sh,sm,0,0), end: new Date().setHours(eh,em,0,0) };
+        }
+        function updateCurrentTime() {
+            const n = new Date();
+            document.getElementById('currentTime').textContent =
+                n.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}) + ', ' +
+                n.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+        }
+        function renderDaysNav() {
+            const nav = document.getElementById('daysNav');
+            nav.innerHTML = '';
+            days.forEach((d,i) => {
+                const b = document.createElement('button');
+                b.className = 'day-btn ' + (i === currentDay ? 'active' : '');
+                b.textContent = d.substring(0,3);
+                b.onclick = () => { currentDay = i; renderDaysNav(); renderSchedule(); };
+                nav.appendChild(b);
+            });
+        }
+        function renderSchedule() {
+            const div = document.getElementById('schedule');
+            const dayName = days[currentDay];
+            const lessons = schedule[dayName];
+            const lc = loadColors();
+            if (lessons.length === 0) {
+                div.innerHTML = '<div class="no-lessons"><div class="emoji">🎉</div><div>Выходной день!</div></div>';
+                return;
+            }
+            const now = new Date().getTime();
+            let html = '';
+            lessons.forEach((lesson, index) => {
+                const times = parseTime(lesson.time);
+                let status = '', cardClass = '';
+                const colorKey = dayName + '-' + lesson.name;
+                const lessonColor = lc[colorKey] || '#667eea';
+                if (now >= times.start && now <= times.end) {
+                    status = '<span class="status-badge status-current">Идёт сейчас</span>';
+                    cardClass = 'current';
+                } else if (now < times.start && (index === 0 || now > parseTime(lessons[index-1].time).end)) {
+                    status = '<span class="status-badge status-next">Следующая пара</span>';
+                    cardClass = 'next';
+                } else {
+                    status = '<span class="status-badge status-upcoming">Предстоит</span>';
+                }
+                html += '<div class="lesson-card ' + cardClass + '" style="border-left-color:' + lessonColor + '" onclick="openColorModal(\'' + colorKey + '\',\'' + lessonColor + '\')">' +
+                    '<div class="color-indicator" style="background:' + lessonColor + '"></div>' +
+                    '<div class="lesson-header"><span class="lesson-number">Пара ' + (index+1) + '</span><span class="lesson-time">' + lesson.time + '</span></div>' +
+                    '<div class="lesson-name">' + lesson.name + '</div>' +
+                    '<div class="lesson-details"><div class="detail-item"><span class="icon">🚪</span><span>' + lesson.room + '</span></div>' +
+                    '<div class="detail-item"><span class="icon">👨‍🏫</span><span>' + lesson.teacher + '</span></div></div>' + status + '</div>';
+            });
+            div.innerHTML = html;
+        }
+        function openColorModal(key, color) {
+            selectedLesson = key;
+            const picker = document.getElementById('colorPicker');
+            picker.innerHTML = '';
+            colors.forEach(c => {
+                const o = document.createElement('div');
+                o.className = 'color-option' + (c === color ? ' selected' : '');
+                o.style.background = c;
+                o.onclick = () => selectColor(c);
+                picker.appendChild(o);
+            });
+            document.getElementById('colorModal').classList.add('active');
+        }
+        function selectColor(color) {
+            const lc = loadColors();
+            lc[selectedLesson] = color;
+            saveColors(lc);
+            closeModal();
+            renderSchedule();
+        }
+        function closeModal() {
+            document.getElementById('colorModal').classList.remove('active');
+            selectedLesson = null;
+        }
+        updateCurrentTime();
+        renderDaysNav();
+        renderSchedule();
+        setInterval(() => { updateCurrentTime(); renderSchedule(); }, 60000);
+        document.getElementById('colorModal').addEventListener('click', e => {
+            if (e.target.id === 'colorModal') closeModal();
+        });
+    </script>
+</body>
+</html>
