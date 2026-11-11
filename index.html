@@ -3,46 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Расписание занятий</title>
+    <title>Расписание</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 8px;
             overflow-x: hidden;
         }
         .container { max-width: 480px; margin: 0 auto; }
         .header {
             background: white;
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
-        .header h1 { color: #333; font-size: 24px; margin-bottom: 10px; }
-        .current-time { color: #666; font-size: 14px; }
+        .header h1 { color: #333; font-size: 16px; margin-bottom: 4px; }
+        .current-time { color: #666; font-size: 11px; }
         .days-nav {
             display: flex;
             overflow-x: auto;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            gap: 6px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
             scroll-behavior: smooth;
         }
+        .days-nav::-webkit-scrollbar { height: 3px; }
+        .days-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.5); border-radius: 2px; }
         .day-btn {
             flex-shrink: 0;
             background: white;
             border: none;
-            padding: 15px 20px;
-            border-radius: 15px;
-            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
             font-weight: 600;
             color: #666;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .day-btn.active {
             background: #667eea;
@@ -51,22 +53,23 @@
         }
         .schedule {
             background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             transition: transform 0.3s;
         }
         .schedule.swiping { transition: none; }
         .lesson-card {
             background: #f8f9fa;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-left: 3px solid #667eea;
             transition: all 0.3s;
             cursor: pointer;
             position: relative;
         }
+        .lesson-card:last-child { margin-bottom: 0; }
         .lesson-card.current {
             background: #e8f4f8;
             border-left-color: #28a745;
@@ -78,54 +81,76 @@
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+            50% { transform: scale(1.01); }
         }
         .lesson-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
         .lesson-number-wrap {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
         }
         .lesson-number {
-            width: 32px;
-            height: 32px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: bold;
             color: white;
             flex-shrink: 0;
         }
-        .lesson-time { color: #666; font-size: 13px; }
-        .lesson-name { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; }
-        .lesson-details { display: flex; gap: 15px; flex-wrap: wrap; }
-        .detail-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #666; }
-        .detail-item .icon { font-size: 16px; }
+        .lesson-time { color: #666; font-size: 11px; font-weight: 500; }
+        .lesson-name { 
+            font-size: 13px; 
+            font-weight: 600; 
+            color: #333; 
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        .lesson-details { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: nowrap;
+            overflow: hidden;
+        }
+        .detail-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 3px; 
+            font-size: 10px; 
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 50%;
+        }
+        .detail-item .icon { font-size: 12px; flex-shrink: 0; }
         .status-badge {
             display: inline-block;
-            padding: 5px 10px;
-            border-radius: 10px;
-            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
             font-weight: 600;
-            margin-top: 10px;
+            margin-top: 6px;
         }
         .status-current { background: #28a745; color: white; }
         .status-next { background: #ffc107; color: #333; }
         .status-upcoming { background: #e9ecef; color: #666; }
-        .no-lessons { text-align: center; padding: 40px 20px; color: #666; }
-        .no-lessons .emoji { font-size: 48px; margin-bottom: 10px; }
+        .no-lessons { text-align: center; padding: 30px 10px; color: #666; }
+        .no-lessons .emoji { font-size: 36px; margin-bottom: 8px; }
         .swipe-hint {
             text-align: center;
             color: rgba(255,255,255,0.7);
-            font-size: 12px;
-            margin-top: 15px;
+            font-size: 10px;
+            margin-top: 8px;
+            padding: 4px;
         }
         .modal {
             display: none;
@@ -136,64 +161,71 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
         .modal.active { display: flex; }
         .modal-content {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 400px;
-            width: 90%;
+            border-radius: 12px;
+            padding: 16px;
+            max-width: 320px;
+            width: 100%;
         }
-        .modal-content h3 { margin-bottom: 20px; color: #333; text-align: center; }
+        .modal-content h3 { margin-bottom: 12px; color: #333; text-align: center; font-size: 14px; }
         .color-picker {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 12px;
         }
         .color-option {
-            width: 50px; height: 50px;
+            width: 40px; 
+            height: 40px;
             border-radius: 50%;
             cursor: pointer;
-            border: 3px solid white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             transition: all 0.3s;
             margin: 0 auto;
         }
-        .color-option:hover { transform: scale(1.2); }
+        .color-option:hover { transform: scale(1.15); }
         .color-option.selected { border-color: #333; transform: scale(1.1); }
         .modal-close {
             width: 100%;
-            padding: 12px;
+            padding: 8px;
             background: #667eea;
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 13px;
             cursor: pointer;
         }
         @media (max-width: 480px) {
-            body { padding: 10px; }
-            .header h1 { font-size: 20px; }
-            .lesson-name { font-size: 16px; }
-            .color-picker { grid-template-columns: repeat(3, 1fr); }
+            body { padding: 6px; }
+            .header h1 { font-size: 14px; }
+            .current-time { font-size: 10px; }
+            .day-btn { padding: 7px 10px; font-size: 10px; }
+            .lesson-name { font-size: 12px; }
+            .lesson-time { font-size: 10px; }
+            .detail-item { font-size: 9px; }
+            .color-picker { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            .color-option { width: 36px; height: 36px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 Расписание занятий</h1>
+            <h1>📚 Расписание</h1>
             <div class="current-time" id="currentTime"></div>
         </div>
         <div class="days-nav" id="daysNav"></div>
         <div class="schedule" id="schedule"></div>
-        <div class="swipe-hint">👈 Свайпни для переключения дня 👉</div>
+        <div class="swipe-hint"> Свайп для смены дня 👉</div>
     </div>
     <div class="modal" id="colorModal">
         <div class="modal-content">
-            <h3>Выберите цвет предмета</h3>
+            <h3>Цвет предмета</h3>
             <div class="color-picker" id="colorPicker"></div>
             <button class="modal-close" onclick="closeModal()">Закрыть</button>
         </div>
@@ -201,36 +233,36 @@
     <script>
         const schedule = {
             'Понедельник': [
-                { time: '8:30-10:00', name: 'Математика', room: 'Каб. 120', teacher: 'Иванов И.И.' },
-                { time: '10:15-11:45', name: 'Физика', room: 'Каб. 205', teacher: 'Петров П.П.' },
-                { time: '12:00-13:30', name: 'Информатика', room: 'Каб. 310', teacher: 'Сидоров С.С.' },
-                { time: '13:45-15:15', name: 'Английский язык', room: 'Каб. 115', teacher: 'Смирнова А.А.' }
+                { time: '8:30-10:00', name: 'Математика', room: '120', teacher: 'Иванов' },
+                { time: '10:15-11:45', name: 'Физика', room: '205', teacher: 'Петров' },
+                { time: '12:00-13:30', name: 'Информатика', room: '310', teacher: 'Сидоров' },
+                { time: '13:45-15:15', name: 'Английский', room: '115', teacher: 'Смирнова' }
             ],
             'Вторник': [
-                { time: '8:30-10:00', name: 'История', room: 'Каб. 220', teacher: 'Козлов К.К.' },
-                { time: '10:15-11:45', name: 'Литература', room: 'Каб. 118', teacher: 'Новикова Н.Н.' },
-                { time: '12:00-13:30', name: 'Биология', room: 'Каб. 305', teacher: 'Морозов М.М.' }
+                { time: '8:30-10:00', name: 'История', room: '220', teacher: 'Козлов' },
+                { time: '10:15-11:45', name: 'Литература', room: '118', teacher: 'Новикова' },
+                { time: '12:00-13:30', name: 'Биология', room: '305', teacher: 'Морозов' }
             ],
             'Среда': [
-                { time: '8:30-10:00', name: 'Химия', room: 'Каб. 215', teacher: 'Волков В.В.' },
-                { time: '10:15-11:45', name: 'География', room: 'Каб. 208', teacher: 'Соколов С.С.' },
-                { time: '12:00-13:30', name: 'Физкультура', room: 'Спортзал', teacher: 'Лебедев Л.Л.' },
-                { time: '13:45-15:15', name: 'ОБЖ', room: 'Каб. 112', teacher: 'Попов П.П.' }
+                { time: '8:30-10:00', name: 'Химия', room: '215', teacher: 'Волков' },
+                { time: '10:15-11:45', name: 'География', room: '208', teacher: 'Соколов' },
+                { time: '12:00-13:30', name: 'Физкультура', room: 'Спортзал', teacher: 'Лебедев' },
+                { time: '13:45-15:15', name: 'ОБЖ', room: '112', teacher: 'Попов' }
             ],
             'Четверг': [
-                { time: '8:30-10:00', name: 'Обществознание', room: 'Каб. 225', teacher: 'Васильев В.В.' },
-                { time: '10:15-11:45', name: 'Математика', room: 'Каб. 120', teacher: 'Иванов И.И.' },
-                { time: '12:00-13:30', name: 'Информатика', room: 'Каб. 310', teacher: 'Сидоров С.С.' }
+                { time: '8:30-10:00', name: 'Обществознание', room: '225', teacher: 'Васильев' },
+                { time: '10:15-11:45', name: 'Математика', room: '120', teacher: 'Иванов' },
+                { time: '12:00-13:30', name: 'Информатика', room: '310', teacher: 'Сидоров' }
             ],
             'Пятница': [
-                { time: '8:30-10:00', name: 'Физика', room: 'Каб. 205', teacher: 'Петров П.П.' },
-                { time: '10:15-11:45', name: 'Английский язык', room: 'Каб. 115', teacher: 'Смирнова А.А.' },
-                { time: '12:00-13:30', name: 'Литература', room: 'Каб. 118', teacher: 'Новикова Н.Н.' },
-                { time: '13:45-15:15', name: 'История', room: 'Каб. 220', teacher: 'Козлов К.К.' }
+                { time: '8:30-10:00', name: 'Физика', room: '205', teacher: 'Петров' },
+                { time: '10:15-11:45', name: 'Английский', room: '115', teacher: 'Смирнова' },
+                { time: '12:00-13:30', name: 'Литература', room: '118', teacher: 'Новикова' },
+                { time: '13:45-15:15', name: 'История', room: '220', teacher: 'Козлов' }
             ],
             'Суббота': [
-                { time: '8:30-10:00', name: 'Биология', room: 'Каб. 305', teacher: 'Морозов М.М.' },
-                { time: '10:15-11:45', name: 'Химия', room: 'Каб. 215', teacher: 'Волков В.В.' }
+                { time: '8:30-10:00', name: 'Биология', room: '305', teacher: 'Морозов' },
+                { time: '10:15-11:45', name: 'Химия', room: '215', teacher: 'Волков' }
             ],
             'Воскресенье': []
         };
@@ -260,11 +292,10 @@
             days.forEach((d,i) => {
                 const b = document.createElement('button');
                 b.className = 'day-btn ' + (i === currentDay ? 'active' : '');
-                b.textContent = d.substring(0,3);
+                b.textContent = d.substring(0, 3);
                 b.onclick = () => { currentDay = i; renderDaysNav(); renderSchedule(); };
                 nav.appendChild(b);
             });
-            // Прокручиваем активную кнопку в видимую область
             setTimeout(() => {
                 const activeBtn = nav.querySelector('.day-btn.active');
                 if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
@@ -276,7 +307,7 @@
             const lessons = schedule[dayName];
             const lc = loadColors();
             if (lessons.length === 0) {
-                div.innerHTML = '<div class="no-lessons"><div class="emoji">🎉</div><div>Выходной день!</div></div>';
+                div.innerHTML = '<div class="no-lessons"><div class="emoji">🎉</div><div>Выходной</div></div>';
                 return;
             }
             const now = new Date();
@@ -289,16 +320,15 @@
                 const colorKey = dayName + '-' + lesson.name;
                 const lessonColor = lc[colorKey] || '#667eea';
                 if (isToday && now.getTime() >= times.start && now.getTime() <= times.end) {
-                    status = '<span class="status-badge status-current">Идёт сейчас</span>';
+                    status = '<span class="status-badge status-current">Сейчас</span>';
                     cardClass = 'current';
                 } else if (isToday && now.getTime() < times.start &&
                            (index === 0 || now.getTime() > parseTime(lessons[index-1].time).end)) {
-                    status = '<span class="status-badge status-next">Следующая пара</span>';
+                    status = '<span class="status-badge status-next">Следующая</span>';
                     cardClass = 'next';
                 } else {
                     status = '<span class="status-badge status-upcoming">Предстоит</span>';
                 }
-                // Кружок цвета теперь содержит номер пары — ничего не перекрывает
                 html += '<div class="lesson-card ' + cardClass + '" style="border-left-color:' + lessonColor + '" onclick="openColorModal(\'' + colorKey + '\',\'' + lessonColor + '\')">' +
                     '<div class="lesson-header">' +
                         '<div class="lesson-number-wrap">' +
@@ -307,8 +337,10 @@
                         '</div>' +
                     '</div>' +
                     '<div class="lesson-name">' + lesson.name + '</div>' +
-                    '<div class="lesson-details"><div class="detail-item"><span class="icon">🚪</span><span>' + lesson.room + '</span></div>' +
-                    '<div class="detail-item"><span class="icon">👨‍🏫</span><span>' + lesson.teacher + '</span></div></div>' + status + '</div>';
+                    '<div class="lesson-details">' +
+                        '<div class="detail-item"><span class="icon">🚪</span><span>Каб. ' + lesson.room + '</span></div>' +
+                        '<div class="detail-item"><span class="icon">👨‍🏫</span><span>' + lesson.teacher + '</span></div>' +
+                    '</div>' + status + '</div>';
             });
             div.innerHTML = html;
         }
@@ -337,27 +369,23 @@
             selectedLesson = null;
         }
 
-        // ===== СВАЙП =====
         let touchStartX = 0;
         let touchEndX = 0;
         const scheduleEl = document.getElementById('schedule');
 
         function handleSwipe() {
             const diff = touchStartX - touchEndX;
-            const threshold = 50; // минимальное расстояние свайпа
+            const threshold = 50;
             if (Math.abs(diff) < threshold) return;
             if (diff > 0 && currentDay < days.length - 1) {
-                // свайп влево → следующий день
                 currentDay++;
             } else if (diff < 0 && currentDay > 0) {
-                // свайп вправо → предыдущий день
                 currentDay--;
             } else {
                 return;
             }
-            // Анимация
             scheduleEl.classList.add('swiping');
-            scheduleEl.style.transform = diff > 0 ? 'translateX(-20px)' : 'translateX(20px)';
+            scheduleEl.style.transform = diff > 0 ? 'translateX(-15px)' : 'translateX(15px)';
             setTimeout(() => {
                 scheduleEl.style.transform = 'translateX(0)';
                 scheduleEl.classList.remove('swiping');
@@ -366,45 +394,22 @@
             renderSchedule();
         }
 
-        // Тач-события (мобильные)
-        scheduleEl.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-        scheduleEl.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, { passive: true });
-
-        // Мышь (десктоп)
+        scheduleEl.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        scheduleEl.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, { passive: true });
         let mouseDown = false;
-        scheduleEl.addEventListener('mousedown', e => {
-            mouseDown = true;
-            touchStartX = e.screenX;
-        });
-        scheduleEl.addEventListener('mouseup', e => {
-            if (!mouseDown) return;
-            mouseDown = false;
-            touchEndX = e.screenX;
-            handleSwipe();
-        });
+        scheduleEl.addEventListener('mousedown', e => { mouseDown = true; touchStartX = e.screenX; });
+        scheduleEl.addEventListener('mouseup', e => { if (!mouseDown) return; mouseDown = false; touchEndX = e.screenX; handleSwipe(); });
         scheduleEl.addEventListener('mouseleave', () => { mouseDown = false; });
-
-        // Клавиатура (стрелки)
         document.addEventListener('keydown', e => {
-            if (e.key === 'ArrowRight' && currentDay < days.length - 1) {
-                currentDay++; renderDaysNav(); renderSchedule();
-            } else if (e.key === 'ArrowLeft' && currentDay > 0) {
-                currentDay--; renderDaysNav(); renderSchedule();
-            }
+            if (e.key === 'ArrowRight' && currentDay < days.length - 1) { currentDay++; renderDaysNav(); renderSchedule(); }
+            else if (e.key === 'ArrowLeft' && currentDay > 0) { currentDay--; renderDaysNav(); renderSchedule(); }
         });
 
         updateCurrentTime();
         renderDaysNav();
         renderSchedule();
         setInterval(() => { updateCurrentTime(); renderSchedule(); }, 60000);
-        document.getElementById('colorModal').addEventListener('click', e => {
-            if (e.target.id === 'colorModal') closeModal();
-        });
+        document.getElementById('colorModal').addEventListener('click', e => { if (e.target.id === 'colorModal') closeModal(); });
     </script>
 </body>
 </html>
