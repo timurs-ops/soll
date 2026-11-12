@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Морской бой (P2P)</title>
+<title>Морской бой (Yjs P2P)</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
   body { background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 20px; }
@@ -10,13 +10,12 @@
   .container { max-width: 900px; margin: 0 auto; }
   .hidden { display: none !important; }
   button { background: #38bdf8; color: #0f172a; border: none; padding: 12px 24px;
-           font-size: 16px; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; transition: 0.2s; }
+           font-size: 16px; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; }
   button:hover { background: #7dd3fc; }
-  button:disabled { background: #475569; cursor: not-allowed; color: #94a3b8; }
+  button:disabled { background: #475569; cursor: not-allowed; }
   button.secondary { background: #475569; color: #e2e8f0; }
   button.secondary:hover { background: #64748b; }
   button.danger { background: #ef4444; color: white; }
-  button.danger:hover { background: #f87171; }
   input { padding: 12px; font-size: 28px; border-radius: 8px; border: 2px solid #38bdf8;
           background: #1e293b; color: #fbbf24; text-align: center; text-transform: uppercase;
           letter-spacing: 6px; width: 220px; font-weight: bold; }
@@ -29,7 +28,7 @@
   .board-wrap h3 { margin-bottom: 10px; color: #38bdf8; }
   table { border-collapse: collapse; background: #1e293b; margin: 0 auto; }
   td { width: 36px; height: 36px; border: 1px solid #475569; text-align: center;
-       cursor: pointer; font-weight: bold; user-select: none; transition: 0.1s; }
+       cursor: pointer; font-weight: bold; user-select: none; }
   td.water { background: #1e293b; }
   td.ship { background: #475569; }
   td.hit { background: #ef4444; color: #fff; }
@@ -40,26 +39,23 @@
   .setup-controls { text-align: center; margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
   .ship-indicator { font-size: 20px; font-weight: bold; color: #fbbf24; margin: 10px 0; }
   .log { max-width: 900px; margin: 20px auto; padding: 15px; background: #1e293b;
-         border-radius: 8px; max-height: 150px; overflow-y: auto; font-size: 14px; border: 1px solid #334155; }
+         border-radius: 8px; max-height: 150px; overflow-y: auto; font-size: 14px; }
   .log div { padding: 4px 0; border-bottom: 1px solid #334155; color: #cbd5e1; }
   .win { font-size: 32px; color: #fbbf24; text-align: center; margin: 20px; font-weight: bold; }
   .lose { font-size: 32px; color: #ef4444; text-align: center; margin: 20px; font-weight: bold; }
   .copy-btn { background: #22c55e; color: white; padding: 8px 16px; font-size: 14px; margin-top: 10px; }
-  .copy-btn:hover { background: #4ade80; }
   .rematch-btn { background: #f59e0b; color: #0f172a; font-size: 18px; padding: 15px 30px; margin-top: 10px; }
-  .rematch-btn:hover { background: #fbbf24; }
   .info-box { background: #1e3a5f; border: 1px solid #38bdf8; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #bae6fd; text-align: center; }
+  .error-box { background: #451a1a; border: 1px solid #ef4444; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; color: #fca5a5; text-align: center; }
 </style>
 </head>
 <body>
 
 <h1>🚢 МОРСКОЙ БОЙ</h1>
 
-<!-- МЕНЮ -->
 <div id="menu" class="container">
   <div class="info-box">
-    💡 Соединение устанавливается напрямую через децентрализованную сеть (без серверов).<br>
-    Придумайте код из 6 символов или используйте предложенный.
+    💡 Соединение через децентрализованную сеть Yjs. Придумайте код из 6 символов.
   </div>
   <div style="text-align:center">
     <button onclick="initHost()">👑 Создать комнату</button>
@@ -71,80 +67,64 @@
   <div class="status" id="menuStatus"></div>
 </div>
 
-<!-- ОЖИДАНИЕ -->
 <div id="waiting" class="container hidden">
   <div style="text-align:center">
     <p>Код комнаты:</p>
     <div class="room-code" id="roomCode">------</div>
     <button class="copy-btn" onclick="copyToClipboard('roomCode')">📋 Копировать код</button>
-    <p style="margin-top:15px; color:#94a3b8">Передай этот код другу. Ожидание подключения...</p>
-    <div class="status" id="waitingStatus">Поиск соперника в сети...</div>
+    <p style="margin-top:15px; color:#94a3b8">Передай код другу. Ожидание подключения...</p>
+    <div class="status" id="waitingStatus">🔍 Поиск соперника в сети...</div>
     <button class="danger" onclick="location.reload()" style="margin-top:10px">Отмена</button>
   </div>
 </div>
 
-<!-- РАССТАНОВКА -->
 <div id="setup" class="container hidden">
-  <div class="status" id="setupStatus">Расставьте корабли. Кликните по полю для установки.</div>
-  <div class="ship-indicator" id="shipIndicator">Ставим: 4-палубный (осталось: 1)</div>
-  
+  <div class="status" id="setupStatus">Расставьте корабли кликом по полю</div>
+  <div class="ship-indicator" id="shipIndicator">Ставим: 4-палубный</div>
   <div class="boards">
     <div class="board-wrap">
       <h3>Ваш флот</h3>
       <table id="myBoardSetup"></table>
     </div>
   </div>
-  
   <div class="setup-controls">
     <button onclick="toggleOrientation()">🔄 Повернуть (R)</button>
-    <button class="secondary" onclick="removeLastShip()">↩️ Удалить последний</button>
-    <button class="danger" onclick="clearSetupBoard()">🗑️ Очистить всё</button>
+    <button class="secondary" onclick="removeLastShip()">↩️ Удалить</button>
+    <button class="danger" onclick="clearSetupBoard()">🗑️ Очистить</button>
     <button class="secondary" onclick="randomPlace()">🎲 Случайно</button>
-    <button onclick="readySetup()" id="readyBtn" disabled style="background:#22c55e; color:white;">✅ Готово к бою</button>
+    <button onclick="readySetup()" id="readyBtn" disabled style="background:#22c55e;color:white;">✅ Готово</button>
   </div>
 </div>
 
-<!-- ИГРА -->
 <div id="game" class="container hidden">
   <div class="status" id="gameStatus"></div>
-  <div id="gameResult" class="hidden"></div>
   <div style="text-align:center">
-    <button id="rematchBtn" class="rematch-btn hidden" onclick="requestRematch()">🔄 Сыграть еще раз</button>
+    <button id="rematchBtn" class="rematch-btn hidden" onclick="requestRematch()">🔄 Сыграть ещё раз</button>
   </div>
   <div class="boards">
-    <div class="board-wrap">
-      <h3>Ваше поле</h3>
-      <table id="myBoard"></table>
-    </div>
-    <div class="board-wrap">
-      <h3>Поле противника</h3>
-      <table id="enemyBoard"></table>
-    </div>
+    <div class="board-wrap"><h3>Ваше поле</h3><table id="myBoard"></table></div>
+    <div class="board-wrap"><h3>Поле противника</h3><table id="enemyBoard"></table></div>
   </div>
   <div class="log" id="log"></div>
 </div>
 
-<!-- Подключаем Trystero через WebTorrent (полностью децентрализовано) -->
 <script type="module">
-import { joinRoom } from 'https://esm.sh/trystero@0.20.0/mqtt';
+import * as Y from 'https://esm.sh/yjs@13.6.8';
+import { WebrtcProvider } from 'https://esm.sh/y-webrtc@10.3.0';
 
-const SIZE = 10;
-const SHIPS = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
-
-let room = null;
-let sendData = null;
-let isHost = false;
-let myRoomCode = '';
+const SIZE = 10, SHIPS = [4,3,3,2,2,2,1,1,1,1];
+let ydoc, provider, hostChannel, guestChannel;
+let isHost = false, myRoomCode = '';
 let myShips = [], enemyShots = [], myShots = [];
 let myTurn = true, ready = false, enemyReady = false, gameOver = false;
+let placedShipsData = [], isHorizontal = true, currentShipIndex = 0;
+let connected = false;
 
-// Расстановка
-let placedShipsData = [];
-let isHorizontal = true;
-let currentShipIndex = 0;
-
-// Уникальный ID приложения, чтобы не пересекаться с другими
-const APP_ID = 'sea-battle-ru-p2p-2024-v1';
+function initArrays() {
+  enemyShots = Array.from({length: SIZE}, () => Array(SIZE).fill(0));
+  myShots = Array.from({length: SIZE}, () => Array(SIZE).fill(0));
+}
+initArrays();
 
 function genCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -152,12 +132,6 @@ function genCode() {
   for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
   return s;
 }
-
-function initArrays() {
-  enemyShots = Array.from({length: SIZE}, () => Array(SIZE).fill(0));
-  myShots = Array.from({length: SIZE}, () => Array(SIZE).fill(0));
-}
-initArrays();
 
 window.initHost = function() {
   isHost = true;
@@ -170,73 +144,94 @@ window.initHost = function() {
 
 window.joinRoom = function() {
   const code = document.getElementById('joinCode').value.trim().toUpperCase();
-  if (code.length !== 6) { 
-    alert('Код должен состоять ровно из 6 символов (буквы и цифры)'); 
-    return; 
-  }
+  if (code.length !== 6) { alert('Код должен быть 6 символов'); return; }
   isHost = false;
   myRoomCode = code;
-  document.getElementById('menuStatus').textContent = 'Подключение к комнате...';
+  document.getElementById('menuStatus').textContent = 'Подключение...';
   connectToRoom(myRoomCode);
 };
 
 function connectToRoom(roomId) {
-  // joinRoom возвращает объект комнаты
-  room = joinRoom({ appId: APP_ID }, roomId);
-  
-  room.onPeerJoin((peerId) => {
-    document.getElementById('waiting').classList.add('hidden');
-    document.getElementById('setup').classList.remove('hidden');
-    resetSetupState();
-    buildSetupBoard();
-    log('✅ Соперник подключился! Расставьте корабли.');
-  });
-  
-  room.onPeerLeave(() => {
-    alert('Соперник отключился от игры.');
-    location.reload();
+  ydoc = new Y.Doc();
+  provider = new WebrtcProvider('sea-battle-' + roomId, ydoc, {
+    signaling: [
+      'wss://signaling.yjs.dev',
+      'wss://y-webrtc-signaling-eu.herokuapp.com',
+      'wss://y-webrtc-signaling-us.herokuapp.com'
+    ],
+    rtcConfig: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun.cloudflare.com:3478' }
+      ]
+    }
   });
 
-  // Создаем канал для отправки данных игры
-  const [send, onReceive] = room.makeAction('gameData');
-  sendData = send;
-  onReceive(onData);
+  hostChannel = ydoc.getMap('host');
+  guestChannel = ydoc.getMap('guest');
+
+  // Слушаем изменения в чужом канале
+  const myChannel = isHost ? guestChannel : hostChannel;
+  myChannel.observe(() => {
+    const data = myChannel.get('data');
+    const ts = myChannel.get('ts');
+    if (data && ts) {
+      try {
+        onData(JSON.parse(data));
+      } catch (e) { console.error('Parse error:', e); }
+    }
+  });
+
+  // Ждём подключения второго игрока
+  provider.on('status', (event) => {
+    if (event.status === 'connected' && !connected) {
+      connected = true;
+      // Даём время на синхронизацию
+      setTimeout(() => {
+        document.getElementById('waiting').classList.add('hidden');
+        document.getElementById('setup').classList.remove('hidden');
+        resetSetupState();
+        buildSetupBoard();
+        log('✅ Соперник подключился! Расставьте корабли.');
+      }, 1000);
+    }
+  });
+
+  // Таймаут: если через 30 секунд никто не подключился
+  setTimeout(() => {
+    if (!connected) {
+      document.getElementById('waitingStatus').innerHTML = 
+        '<div class="error-box">⚠️ Не удалось найти соперника за 30 секунд.<br>Возможно, signaling-серверы заблокированы в твоём регионе.<br>Попробуй обновить страницу или используй вариант с ручным обменом кодами.</div>';
+    }
+  }, 30000);
 }
 
-function send(obj) { 
-  if (sendData) sendData(obj); 
+function send(obj) {
+  const channel = isHost ? hostChannel : guestChannel;
+  channel.set('data', JSON.stringify(obj));
+  channel.set('ts', Date.now()); // обязательно меняем, чтобы триггерить observe
 }
 
-function onData(data, peerId) {
-  if (data.type === 'rematch') {
-    resetGameState();
-  } else if (data.type === 'ready') {
-    enemyReady = true;
-    log('👤 Противник готов к бою!');
+function onData(data) {
+  if (data.type === 'rematch') resetGameState();
+  else if (data.type === 'ready') {
+    enemyReady = true; log('👤 Противник готов!');
     if (ready && isHost) startGame();
   } else if (data.type === 'start') {
     myTurn = data.myTurn;
     document.getElementById('setup').classList.add('hidden');
     document.getElementById('game').classList.remove('hidden');
-    buildBoard('myBoard');
-    buildBoard('enemyBoard');
-    updateGameStatus();
-    log('⚔️ Бой начался!');
-  } else if (data.type === 'shot') {
-    handleEnemyShot(data.r, data.c);
-  } else if (data.type === 'shotResult') {
-    applyMyShotResult(data.r, data.c, data.result, data.cells);
-  }
+    buildBoard('myBoard'); buildBoard('enemyBoard');
+    updateGameStatus(); log('⚔️ Бой начался!');
+  } else if (data.type === 'shot') handleEnemyShot(data.r, data.c);
+  else if (data.type === 'shotResult') applyMyShotResult(data.r, data.c, data.result, data.cells);
 }
 
 // ===== РАССТАНОВКА =====
 function resetSetupState() {
-  placedShipsData = [];
-  currentShipIndex = 0;
-  isHorizontal = true;
-  ready = false;
+  placedShipsData = []; currentShipIndex = 0; isHorizontal = true; ready = false;
   document.getElementById('readyBtn').disabled = true;
-  document.getElementById('readyBtn').textContent = '✅ Готово к бою';
+  document.getElementById('readyBtn').textContent = '✅ Готово';
   updateShipIndicator();
 }
 
@@ -245,27 +240,24 @@ function getSetupGrid() {
   for (const ship of placedShipsData) {
     for (const [r, c] of ship.cells) {
       grid[r][c] = 1;
-      for (let dr = -1; dr <= 1; dr++) {
+      for (let dr = -1; dr <= 1; dr++)
         for (let dc = -1; dc <= 1; dc++) {
-          const nr = r + dr, nc = c + dc;
-          if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && grid[nr][nc] === 0) {
-            grid[nr][nc] = 2;
-          }
+          const nr = r+dr, nc = c+dc;
+          if (nr>=0 && nr<SIZE && nc>=0 && nc<SIZE && grid[nr][nc]===0) grid[nr][nc] = 2;
         }
-      }
     }
   }
   return grid;
 }
 
-function canPlace(r, c, size, horizontal) {
+function canPlace(r, c, size, h) {
   const grid = getSetupGrid();
-  if (horizontal) {
-    if (c + size > SIZE) return false;
-    for (let i = 0; i < size; i++) if (grid[r][c + i] !== 0) return false;
+  if (h) {
+    if (c+size > SIZE) return false;
+    for (let i = 0; i < size; i++) if (grid[r][c+i] !== 0) return false;
   } else {
-    if (r + size > SIZE) return false;
-    for (let i = 0; i < size; i++) if (grid[r + i][c] !== 0) return false;
+    if (r+size > SIZE) return false;
+    for (let i = 0; i < size; i++) if (grid[r+i][c] !== 0) return false;
   }
   return true;
 }
@@ -274,26 +266,18 @@ function placeShip(r, c) {
   if (currentShipIndex >= SHIPS.length) return;
   const size = SHIPS[currentShipIndex];
   if (!canPlace(r, c, size, isHorizontal)) return;
-
   const cells = [];
-  for (let i = 0; i < size; i++) {
-    cells.push([isHorizontal ? r : r + i, isHorizontal ? c + i : c]);
-  }
-  
+  for (let i = 0; i < size; i++)
+    cells.push([isHorizontal ? r : r+i, isHorizontal ? c+i : c]);
   placedShipsData.push({ size, horizontal: isHorizontal, cells });
   currentShipIndex++;
-  updateShipIndicator();
-  buildSetupBoard();
-  
-  if (currentShipIndex >= SHIPS.length) {
-    document.getElementById('readyBtn').disabled = false;
-  }
+  updateShipIndicator(); buildSetupBoard();
+  if (currentShipIndex >= SHIPS.length) document.getElementById('readyBtn').disabled = false;
 }
 
 function removeLastShip() {
   if (placedShipsData.length > 0) {
-    placedShipsData.pop();
-    currentShipIndex--;
+    placedShipsData.pop(); currentShipIndex--;
     updateShipIndicator();
     document.getElementById('readyBtn').disabled = true;
     buildSetupBoard();
@@ -301,8 +285,7 @@ function removeLastShip() {
 }
 
 function clearSetupBoard() {
-  placedShipsData = [];
-  currentShipIndex = 0;
+  placedShipsData = []; currentShipIndex = 0;
   updateShipIndicator();
   document.getElementById('readyBtn').disabled = true;
   buildSetupBoard();
@@ -311,36 +294,32 @@ function clearSetupBoard() {
 function updateShipIndicator() {
   const el = document.getElementById('shipIndicator');
   if (currentShipIndex >= SHIPS.length) {
-    el.textContent = 'Все корабли расставлены! Нажмите "Готово к бою"';
+    el.textContent = 'Все корабли расставлены!';
     el.style.color = '#22c55e';
   } else {
     const size = SHIPS[currentShipIndex];
-    const count = SHIPS.filter(s => s === size).length - placedShipsData.filter(s => s.size === size).length;
-    el.textContent = `Ставим: ${size}-палубный (осталось: ${count}) | ${isHorizontal ? 'Горизонтально' : 'Вертикально'}`;
+    const count = SHIPS.filter(s=>s===size).length - placedShipsData.filter(s=>s.size===size).length;
+    el.textContent = `Ставим: ${size}-палубный (осталось: ${count}) | ${isHorizontal?'Горизонтально':'Вертикально'}`;
     el.style.color = '#fbbf24';
   }
 }
 
 function toggleOrientation() {
   isHorizontal = !isHorizontal;
-  updateShipIndicator();
-  buildSetupBoard();
+  updateShipIndicator(); buildSetupBoard();
 }
 
 function buildSetupBoard() {
   const t = document.getElementById('myBoardSetup');
   t.innerHTML = '';
   const grid = getSetupGrid();
-  
   for (let r = 0; r < SIZE; r++) {
     const tr = document.createElement('tr');
     for (let c = 0; c < SIZE; c++) {
       const td = document.createElement('td');
       td.dataset.r = r; td.dataset.c = c;
-      
-      if (grid[r][c] === 1) {
-        td.className = 'ship';
-      } else {
+      if (grid[r][c] === 1) td.className = 'ship';
+      else {
         td.className = 'water';
         td.onclick = () => placeShip(r, c);
         td.oncontextmenu = (e) => { e.preventDefault(); removeLastShip(); };
@@ -357,29 +336,20 @@ function showHover(r, c) {
   if (currentShipIndex >= SHIPS.length) return;
   const size = SHIPS[currentShipIndex];
   const valid = canPlace(r, c, size, isHorizontal);
-  const className = valid ? 'hover-valid' : 'hover-invalid';
-  
-  const cellsToHover = [];
-  for (let i = 0; i < size; i++) {
-    const hr = isHorizontal ? r : r + i;
-    const hc = isHorizontal ? c + i : c;
-    if (hr < SIZE && hc < SIZE) cellsToHover.push([hr, hc]);
-  }
-  
+  const cls = valid ? 'hover-valid' : 'hover-invalid';
   const t = document.getElementById('myBoardSetup');
-  cellsToHover.forEach(([hr, hc]) => {
-    const cell = t.rows[hr].cells[hc];
-    if (cell.className === 'water') cell.classList.add(className);
-  });
+  for (let i = 0; i < size; i++) {
+    const hr = isHorizontal ? r : r+i, hc = isHorizontal ? c+i : c;
+    if (hr < SIZE && hc < SIZE && t.rows[hr].cells[hc].className === 'water')
+      t.rows[hr].cells[hc].classList.add(cls);
+  }
 }
 
 function clearHover() {
   const t = document.getElementById('myBoardSetup');
-  for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++) {
+  for (let r = 0; r < SIZE; r++)
+    for (let c = 0; c < SIZE; c++)
       t.rows[r].cells[c].classList.remove('hover-valid', 'hover-invalid');
-    }
-  }
 }
 
 function randomPlace() {
@@ -389,38 +359,27 @@ function randomPlace() {
     let placed = false, attempts = 0;
     while (!placed && attempts < 500) {
       attempts++;
-      const horiz = Math.random() < 0.5;
-      const r = Math.floor(Math.random() * SIZE), c = Math.floor(Math.random() * SIZE);
-      
+      const h = Math.random() < 0.5;
+      const r = Math.floor(Math.random()*SIZE), c = Math.floor(Math.random()*SIZE);
       let can = true;
-      if (horiz) {
-        if (c + size > SIZE) can = false;
-        else for (let i = 0; i < size; i++) if (grid[r][c + i] !== 0) can = false;
-      } else {
-        if (r + size > SIZE) can = false;
-        else for (let i = 0; i < size; i++) if (grid[r + i][c] !== 0) can = false;
-      }
-      
+      if (h) { if (c+size>SIZE) can=false; else for(let i=0;i<size;i++) if(grid[r][c+i]!==0) can=false; }
+      else { if (r+size>SIZE) can=false; else for(let i=0;i<size;i++) if(grid[r+i][c]!==0) can=false; }
       if (can) {
         const cells = [];
         for (let i = 0; i < size; i++) {
-          const nr = horiz ? r : r + i, nc = horiz ? c + i : c;
-          grid[nr][nc] = 1;
-          cells.push([nr, nc]);
-          for (let dr = -1; dr <= 1; dr++)
-            for (let dc = -1; dc <= 1; dc++) {
-              const rr = nr + dr, cc = nc + dc;
-              if (rr >= 0 && rr < SIZE && cc >= 0 && cc < SIZE && grid[rr][cc] === 0) grid[rr][cc] = 2;
-            }
+          const nr = h?r:r+i, nc = h?c+i:c;
+          grid[nr][nc] = 1; cells.push([nr, nc]);
+          for (let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) {
+            const rr=nr+dr,cc=nc+dc;
+            if(rr>=0&&rr<SIZE&&cc>=0&&cc<SIZE&&grid[rr][cc]===0) grid[rr][cc]=2;
+          }
         }
-        placedShipsData.push({ size, horizontal: horiz, cells });
-        currentShipIndex++;
-        placed = true;
+        placedShipsData.push({size, horizontal:h, cells});
+        currentShipIndex++; placed = true;
       }
     }
   }
-  updateShipIndicator();
-  buildSetupBoard();
+  updateShipIndicator(); buildSetupBoard();
   document.getElementById('readyBtn').disabled = false;
 }
 
@@ -428,43 +387,29 @@ function readySetup() {
   if (currentShipIndex < SHIPS.length) return alert('Расставьте все корабли!');
   ready = true;
   myShips = placedShipsData.map(s => ({ cells: s.cells, hits: 0 }));
-  
   document.getElementById('readyBtn').disabled = true;
   document.getElementById('readyBtn').textContent = '⏳ Ожидание...';
-  document.getElementById('setupStatus').textContent = 'Ожидание готовности противника...';
+  document.getElementById('setupStatus').textContent = 'Ожидание противника...';
   send({ type: 'ready' });
   if (isHost && enemyReady) startGame();
 }
 
 // ===== ИГРА =====
 function resetGameState() {
-  myShips = [];
-  initArrays();
-  ready = false;
-  enemyReady = false;
-  gameOver = false;
-  
+  myShips = []; initArrays();
+  ready = false; enemyReady = false; gameOver = false;
   document.getElementById('game').classList.add('hidden');
-  document.getElementById('gameResult').classList.add('hidden');
-  document.getElementById('gameResult').innerHTML = '';
   document.getElementById('setup').classList.remove('hidden');
-  
-  resetSetupState();
-  buildSetupBoard();
-  document.getElementById('setupStatus').textContent = 'Новая игра! Расставьте корабли.';
-  
-  const rematchBtn = document.getElementById('rematchBtn');
-  rematchBtn.classList.add('hidden');
-  rematchBtn.disabled = false;
-  rematchBtn.textContent = '🔄 Сыграть еще раз';
-  
-  log('🔄 --- Начало новой игры ---');
+  resetSetupState(); buildSetupBoard();
+  document.getElementById('setupStatus').textContent = 'Новая игра!';
+  const btn = document.getElementById('rematchBtn');
+  btn.classList.add('hidden'); btn.disabled = false; btn.textContent = '🔄 Сыграть ещё раз';
+  log('🔄 --- Новая игра ---');
 }
 
 window.requestRematch = function() {
   const btn = document.getElementById('rematchBtn');
-  btn.disabled = true;
-  btn.textContent = '⏳ Ожидание противника...';
+  btn.disabled = true; btn.textContent = '⏳ Ожидание...';
   send({ type: 'rematch' });
   resetGameState();
 }
@@ -491,14 +436,13 @@ function startGame() {
   myTurn = isHost ? hostStarts : !hostStarts;
   document.getElementById('setup').classList.add('hidden');
   document.getElementById('game').classList.remove('hidden');
-  buildBoard('myBoard');
-  buildBoard('enemyBoard');
+  buildBoard('myBoard'); buildBoard('enemyBoard');
   updateGameStatus();
 }
 
 function updateGameStatus() {
   if (gameOver) return;
-  document.getElementById('gameStatus').textContent = myTurn ? '🎯 ВАШ ХОД! Стреляйте по полю противника' : '⏳ Ход противника...';
+  document.getElementById('gameStatus').textContent = myTurn ? '🎯 ВАШ ХОД!' : '⏳ Ход противника...';
 }
 
 function shoot(r, c) {
@@ -518,15 +462,12 @@ function handleEnemyShot(r, c) {
     myShips[shipIdx].hits++;
     if (myShips[shipIdx].hits === myShips[shipIdx].cells.length) result = 'kill';
   }
-
   const t = document.getElementById('myBoard');
   if (result === 'miss') { t.rows[r].cells[c].className = 'miss'; t.rows[r].cells[c].textContent = '•'; }
   else if (result === 'hit') { t.rows[r].cells[c].className = 'hit'; t.rows[r].cells[c].textContent = '✕'; }
   else if (result === 'kill') markKill(t, myShips[shipIdx].cells, true);
-
   log(`🔴 Противник: ${cellName(r,c)} - ${result==='miss'?'промах':result==='hit'?'попадание':'УБИЛ!'}`);
-  send({ type: 'shotResult', r, c, result, cells: result==='kill' ? myShips[shipIdx].cells : [] });
-
+  send({ type: 'shotResult', r, c, result, cells: result==='kill'?myShips[shipIdx].cells:[] });
   if (myShips.every(s => s.hits === s.cells.length)) {
     gameOver = true;
     document.getElementById('gameStatus').innerHTML = '<div class="lose">💀 ВЫ ПРОИГРАЛИ</div>';
@@ -572,22 +513,20 @@ function markKill(table, cells, isMyBoard) {
     table.rows[r].cells[c].textContent = '✕';
   });
   cells.forEach(([r,c]) => {
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
-        const rr = r + dr, cc = c + dc;
-        if (rr >= 0 && rr < SIZE && cc >= 0 && cc < SIZE) {
-          const td = table.rows[rr].cells[cc];
-          if (td.className === 'water') {
-            td.className = 'miss'; td.textContent = '•';
-            if (!isMyBoard) myShots[rr][cc] = 1;
-          }
+    for (let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) {
+      const rr=r+dr,cc=c+dc;
+      if(rr>=0&&rr<SIZE&&cc>=0&&cc<SIZE) {
+        const td = table.rows[rr].cells[cc];
+        if (td.className === 'water') {
+          td.className = 'miss'; td.textContent = '•';
+          if (!isMyBoard) myShots[rr][cc] = 1;
         }
       }
     }
   });
 }
 
-function cellName(r, c) { return String.fromCharCode(65 + c) + (r + 1); }
+function cellName(r, c) { return String.fromCharCode(65+c) + (r+1); }
 
 function log(msg) {
   const l = document.getElementById('log');
@@ -600,23 +539,18 @@ function copyToClipboard(id) {
   const el = document.getElementById(id);
   const text = el.textContent;
   navigator.clipboard.writeText(text).then(() => {
-    alert('✅ Код скопирован! Отправьте его другу.');
+    alert('✅ Код скопирован!');
   }).catch(() => {
-    // Fallback
-    el.select();
-    document.execCommand('copy');
+    el.select(); document.execCommand('copy');
     alert('✅ Код скопирован!');
   });
 }
+window.copyToClipboard = copyToClipboard;
 
 document.addEventListener('keydown', (e) => {
-  if ((e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') && !document.getElementById('setup').classList.contains('hidden')) {
+  if ((e.key==='r'||e.key==='R'||e.key==='к'||e.key==='К') && !document.getElementById('setup').classList.contains('hidden'))
     toggleOrientation();
-  }
 });
-
-// Делаем функции доступными глобально для onclick в HTML
-window.copyToClipboard = copyToClipboard;
 </script>
 </body>
 </html>
