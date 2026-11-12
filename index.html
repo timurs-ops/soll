@@ -1,556 +1,640 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Морской бой (Yjs P2P)</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-  body { background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 20px; }
-  h1 { text-align: center; margin-bottom: 20px; color: #38bdf8; }
-  .container { max-width: 900px; margin: 0 auto; }
-  .hidden { display: none !important; }
-  button { background: #38bdf8; color: #0f172a; border: none; padding: 12px 24px;
-           font-size: 16px; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; }
-  button:hover { background: #7dd3fc; }
-  button:disabled { background: #475569; cursor: not-allowed; }
-  button.secondary { background: #475569; color: #e2e8f0; }
-  button.secondary:hover { background: #64748b; }
-  button.danger { background: #ef4444; color: white; }
-  input { padding: 12px; font-size: 28px; border-radius: 8px; border: 2px solid #38bdf8;
-          background: #1e293b; color: #fbbf24; text-align: center; text-transform: uppercase;
-          letter-spacing: 6px; width: 220px; font-weight: bold; }
-  .room-code { font-size: 42px; font-weight: bold; color: #fbbf24; letter-spacing: 8px;
-               background: #1e293b; padding: 20px; border-radius: 12px; display: inline-block;
-               border: 2px solid #fbbf24; margin: 10px 0; }
-  .status { text-align: center; margin: 15px 0; font-size: 18px; color: #fbbf24; min-height: 25px; }
-  .boards { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
-  .board-wrap { text-align: center; }
-  .board-wrap h3 { margin-bottom: 10px; color: #38bdf8; }
-  table { border-collapse: collapse; background: #1e293b; margin: 0 auto; }
-  td { width: 36px; height: 36px; border: 1px solid #475569; text-align: center;
-       cursor: pointer; font-weight: bold; user-select: none; }
-  td.water { background: #1e293b; }
-  td.ship { background: #475569; }
-  td.hit { background: #ef4444; color: #fff; }
-  td.miss { background: #334155; color: #94a3b8; }
-  td.kill { background: #b91c1c; color: #fff; }
-  td.hover-valid { background: rgba(34, 197, 94, 0.6) !important; }
-  td.hover-invalid { background: rgba(239, 68, 68, 0.6) !important; }
-  .setup-controls { text-align: center; margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-  .ship-indicator { font-size: 20px; font-weight: bold; color: #fbbf24; margin: 10px 0; }
-  .log { max-width: 900px; margin: 20px auto; padding: 15px; background: #1e293b;
-         border-radius: 8px; max-height: 150px; overflow-y: auto; font-size: 14px; }
-  .log div { padding: 4px 0; border-bottom: 1px solid #334155; color: #cbd5e1; }
-  .win { font-size: 32px; color: #fbbf24; text-align: center; margin: 20px; font-weight: bold; }
-  .lose { font-size: 32px; color: #ef4444; text-align: center; margin: 20px; font-weight: bold; }
-  .copy-btn { background: #22c55e; color: white; padding: 8px 16px; font-size: 14px; margin-top: 10px; }
-  .rematch-btn { background: #f59e0b; color: #0f172a; font-size: 18px; padding: 15px 30px; margin-top: 10px; }
-  .info-box { background: #1e3a5f; border: 1px solid #38bdf8; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #bae6fd; text-align: center; }
-  .error-box { background: #451a1a; border: 1px solid #ef4444; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; color: #fca5a5; text-align: center; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Расписание</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #5a7d9a 0%, #7a9bb5 100%);
+            min-height: 100vh;
+            padding: 16px;
+            overflow-x: hidden;
+            touch-action: pan-y;
+        }
+        .container { 
+            max-width: 500px; 
+            margin: 0 auto; 
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 32px);
+        }
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header h1 { color: #333; font-size: 20px; margin-bottom: 6px; font-weight: 700; }
+        .current-time { color: #666; font-size: 13px; }
+        
+        .stats-bar {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            font-size: 11px;
+            color: #555;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #5a7d9a;
+        }
+        
+        .days-nav {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .days-nav::-webkit-scrollbar { height: 4px; }
+        .days-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 2px; }
+        
+        .day-btn {
+            flex-shrink: 0;
+            background: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .day-btn.active {
+            background: #5a7d9a;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(90, 125, 154, 0.4);
+        }
+        
+        .schedule {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            flex: 1;
+        }
+        .schedule.swiping { transition: none; }
+        
+        .lesson-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border-left: 4px solid #5a7d9a;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .lesson-card:last-child { margin-bottom: 0; }
+        .lesson-card.current {
+            background: #e8f4f8;
+            border-left-color: #28a745;
+        }
+        .lesson-card.next {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        
+        .lesson-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .lesson-number-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .lesson-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+        .lesson-time { color: #666; font-size: 12px; font-weight: 500; }
+        .lesson-name { 
+            font-size: 15px; 
+            font-weight: 600; 
+            color: #333; 
+            margin-bottom: 8px;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .lesson-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .lesson-details { 
+            display: flex; 
+            gap: 12px; 
+            flex-wrap: nowrap;
+            overflow: hidden;
+        }
+        .detail-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+            font-size: 11px; 
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 50%;
+        }
+        .detail-item .icon { font-size: 13px; flex-shrink: 0; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .status-current { background: #28a745; color: white; }
+        .status-next { background: #ffc107; color: #333; }
+        .status-upcoming { background: #e9ecef; color: #666; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #28a745;
+            border-radius: 2px;
+            transition: width 1s linear;
+        }
+        
+        .timer-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #28a745;
+            color: white;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 6px;
+            margin-left: 8px;
+        }
+        
+        .announcements {
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .announcements h3 {
+            font-size: 12px;
+            color: #5a7d9a;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .announcement-item {
+            font-size: 11px;
+            color: #555;
+            padding: 6px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .announcement-item:last-child { border-bottom: none; }
+        .announcement-date {
+            font-size: 9px;
+            color: #999;
+            margin-top: 2px;
+        }
+        
+        .no-lessons { text-align: center; padding: 40px 20px; color: #666; }
+        .no-lessons .emoji { font-size: 48px; margin-bottom: 12px; }
+        
+        .swipe-hint {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            font-size: 11px;
+            margin-top: 12px;
+            padding: 6px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .modal-content h3 { margin-bottom: 16px; color: #333; text-align: center; font-size: 16px; }
+        .color-picker {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .color-option {
+            width: 50px; 
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            margin: 0 auto;
+        }
+        .color-option:hover { transform: scale(1.15); }
+        .color-option.selected { border-color: #333; transform: scale(1.1); }
+        .modal-close {
+            width: 100%;
+            padding: 10px;
+            background: #5a7d9a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        @media (min-width: 768px) and (orientation: portrait) {
+            body { padding: 40px; }
+            .container { max-width: 900px; }
+            .header { padding: 32px; margin-bottom: 24px; }
+            .header h1 { font-size: 48px; margin-bottom: 12px; }
+            .current-time { font-size: 28px; }
+            .stats-bar { padding: 20px; margin-bottom: 24px; font-size: 18px; }
+            .stat-value { font-size: 28px; }
+            .days-nav { gap: 16px; margin-bottom: 24px; padding-bottom: 16px; }
+            .day-btn { padding: 20px 32px; font-size: 24px; border-radius: 20px; }
+            .schedule { padding: 32px; }
+            .lesson-card { padding: 28px; margin-bottom: 24px; border-left-width: 8px; }
+            .lesson-number { width: 56px; height: 56px; font-size: 24px; }
+            .lesson-time { font-size: 24px; }
+            .lesson-name { font-size: 32px; margin-bottom: 16px; }
+            .lesson-icon { font-size: 36px; }
+            .detail-item { font-size: 22px; gap: 8px; }
+            .detail-item .icon { font-size: 28px; }
+            .status-badge { padding: 8px 20px; font-size: 20px; margin-top: 16px; }
+            .progress-bar { height: 8px; margin-top: 16px; }
+            .timer-badge { padding: 6px 14px; font-size: 18px; margin-top: 12px; margin-left: 12px; }
+            .announcements { padding: 24px; margin-bottom: 24px; }
+            .announcements h3 { font-size: 22px; margin-bottom: 16px; }
+            .announcement-item { font-size: 20px; padding: 12px 0; }
+            .announcement-date { font-size: 16px; }
+            .no-lessons { padding: 80px 40px; }
+            .no-lessons .emoji { font-size: 96px; }
+            .swipe-hint { font-size: 20px; margin-top: 24px; }
+        }
+
+        @media (min-width: 768px) and (orientation: portrait) {
+            .swipe-hint { display: none; }
+        }
+    </style>
 </head>
 <body>
-
-<h1>🚢 МОРСКОЙ БОЙ</h1>
-
-<div id="menu" class="container">
-  <div class="info-box">
-    💡 Соединение через децентрализованную сеть Yjs. Придумайте код из 6 символов.
-  </div>
-  <div style="text-align:center">
-    <button onclick="initHost()">👑 Создать комнату</button>
-    <br><br>
-    <input id="joinCode" maxlength="6" placeholder="КОД">
-    <br><br>
-    <button onclick="joinRoom()">🎮 Присоединиться</button>
-  </div>
-  <div class="status" id="menuStatus"></div>
-</div>
-
-<div id="waiting" class="container hidden">
-  <div style="text-align:center">
-    <p>Код комнаты:</p>
-    <div class="room-code" id="roomCode">------</div>
-    <button class="copy-btn" onclick="copyToClipboard('roomCode')">📋 Копировать код</button>
-    <p style="margin-top:15px; color:#94a3b8">Передай код другу. Ожидание подключения...</p>
-    <div class="status" id="waitingStatus">🔍 Поиск соперника в сети...</div>
-    <button class="danger" onclick="location.reload()" style="margin-top:10px">Отмена</button>
-  </div>
-</div>
-
-<div id="setup" class="container hidden">
-  <div class="status" id="setupStatus">Расставьте корабли кликом по полю</div>
-  <div class="ship-indicator" id="shipIndicator">Ставим: 4-палубный</div>
-  <div class="boards">
-    <div class="board-wrap">
-      <h3>Ваш флот</h3>
-      <table id="myBoardSetup"></table>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Расписание</h1>
+            <div class="current-time" id="currentTime"></div>
+        </div>
+        
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-item">
+                <span>Пар сегодня</span>
+                <span class="stat-value" id="totalLessons">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Начало</span>
+                <span class="stat-value" id="firstLesson">-</span>
+            </div>
+            <div class="stat-item">
+                <span>Конец</span>
+                <span class="stat-value" id="lastLesson">-</span>
+            </div>
+        </div>
+        
+        <div class="announcements" id="announcements">
+            <h3>📢 Объявления</h3>
+            <div id="announcementsList"></div>
+        </div>
+        
+        <div class="days-nav" id="daysNav"></div>
+        <div class="schedule" id="schedule"></div>
+        <div class="swipe-hint">Свайп для смены дня 👉</div>
     </div>
-  </div>
-  <div class="setup-controls">
-    <button onclick="toggleOrientation()">🔄 Повернуть (R)</button>
-    <button class="secondary" onclick="removeLastShip()">↩️ Удалить</button>
-    <button class="danger" onclick="clearSetupBoard()">🗑️ Очистить</button>
-    <button class="secondary" onclick="randomPlace()">🎲 Случайно</button>
-    <button onclick="readySetup()" id="readyBtn" disabled style="background:#22c55e;color:white;">✅ Готово</button>
-  </div>
-</div>
+    <div class="modal" id="colorModal">
+        <div class="modal-content">
+            <h3>Цвет предмета</h3>
+            <div class="color-picker" id="colorPicker"></div>
+            <button class="modal-close" onclick="closeModal()">Закрыть</button>
+        </div>
+    </div>
+    <script>
+        const schedule = {
+            'Понедельник': [
+                { time: '8:30-10:00', name: 'Математика', room: '120', teacher: 'Иванов', icon: '📐' },
+                { time: '10:15-11:45', name: 'Физика', room: '205', teacher: 'Петров', icon: '🔬' },
+                { time: '12:00-13:30', name: 'Информатика', room: '310', teacher: 'Сидоров', icon: '💻' },
+                { time: '13:45-15:15', name: 'Английский', room: '115', teacher: 'Смирнова', icon: '🌍' }
+            ],
+            'Вторник': [
+                { time: '8:30-10:00', name: 'История', room: '220', teacher: 'Козлов', icon: '📜' },
+                { time: '10:15-11:45', name: 'Литература', room: '118', teacher: 'Новикова', icon: '📖' },
+                { time: '12:00-13:30', name: 'Биология', room: '305', teacher: 'Морозов', icon: '🧬' }
+            ],
+            'Среда': [
+                { time: '8:30-10:00', name: 'Химия', room: '215', teacher: 'Волков', icon: '⚗️' },
+                { time: '10:15-11:45', name: 'География', room: '208', teacher: 'Соколов', icon: '🌍' },
+                { time: '12:00-13:30', name: 'Физкультура', room: 'Спортзал', teacher: 'Лебедев', icon: '⚽' },
+                { time: '13:45-15:15', name: 'ОБЖ', room: '112', teacher: 'Попов', icon: '🛡️' }
+            ],
+            'Четверг': [
+                { time: '8:30-10:00', name: 'Обществознание', room: '225', teacher: 'Васильев', icon: '🏛️' },
+                { time: '10:15-11:45', name: 'Математика', room: '120', teacher: 'Иванов', icon: '📐' },
+                { time: '12:00-13:30', name: 'Информатика', room: '310', teacher: 'Сидоров', icon: '💻' }
+            ],
+            'Пятница': [
+                { time: '8:30-10:00', name: 'Физика', room: '205', teacher: 'Петров', icon: '🔬' },
+                { time: '10:15-11:45', name: 'Английский', room: '115', teacher: 'Смирнова', icon: '🌍' },
+                { time: '12:00-13:30', name: 'Литература', room: '118', teacher: 'Новикова', icon: '📖' },
+                { time: '13:45-15:15', name: 'История', room: '220', teacher: 'Козлов', icon: '📜' }
+            ],
+            'Суббота': [
+                { time: '8:30-10:00', name: 'Биология', room: '305', teacher: 'Морозов', icon: '🧬' },
+                { time: '10:15-11:45', name: 'Химия', room: '215', teacher: 'Волков', icon: '⚗️' }
+            ],
+            'Воскресенье': []
+        };
+        
+        const announcements = [
+            { text: 'Завтра родительское собрание в 18:00', date: '12 ноября' },
+            { text: 'Сбор макулатуры до пятницы', date: '10 ноября' },
+            { text: 'Олимпиада по математике — регистрация до 20 ноября', date: '8 ноября' }
+        ];
+        
+        const colors = ['#A8D8EA','#AA96DA','#FCBAD3','#FFFFD2','#A8E6CF','#FFD3B6','#D4A5A5','#B5EAD7','#C7CEEA','#F8B195','#E2F0CB','#FFDAC1'];
+        const days = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+        let currentDay = new Date().getDay();
+        currentDay = currentDay === 0 ? 6 : currentDay - 1;
+        let selectedLesson = null;
+        let autoSwitchInterval = null;
 
-<div id="game" class="container hidden">
-  <div class="status" id="gameStatus"></div>
-  <div style="text-align:center">
-    <button id="rematchBtn" class="rematch-btn hidden" onclick="requestRematch()">🔄 Сыграть ещё раз</button>
-  </div>
-  <div class="boards">
-    <div class="board-wrap"><h3>Ваше поле</h3><table id="myBoard"></table></div>
-    <div class="board-wrap"><h3>Поле противника</h3><table id="enemyBoard"></table></div>
-  </div>
-  <div class="log" id="log"></div>
-</div>
-
-<script type="module">
-import * as Y from 'https://esm.sh/yjs@13.6.8';
-import { WebrtcProvider } from 'https://esm.sh/y-webrtc@10.3.0';
-
-const SIZE = 10, SHIPS = [4,3,3,2,2,2,1,1,1,1];
-let ydoc, provider, hostChannel, guestChannel;
-let isHost = false, myRoomCode = '';
-let myShips = [], enemyShots = [], myShots = [];
-let myTurn = true, ready = false, enemyReady = false, gameOver = false;
-let placedShipsData = [], isHorizontal = true, currentShipIndex = 0;
-let connected = false;
-
-function initArrays() {
-  enemyShots = Array.from({length: SIZE}, () => Array(SIZE).fill(0));
-  myShots = Array.from({length: SIZE}, () => Array(SIZE).fill(0));
-}
-initArrays();
-
-function genCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let s = '';
-  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
-  return s;
-}
-
-window.initHost = function() {
-  isHost = true;
-  myRoomCode = genCode();
-  document.getElementById('menu').classList.add('hidden');
-  document.getElementById('waiting').classList.remove('hidden');
-  document.getElementById('roomCode').textContent = myRoomCode;
-  connectToRoom(myRoomCode);
-};
-
-window.joinRoom = function() {
-  const code = document.getElementById('joinCode').value.trim().toUpperCase();
-  if (code.length !== 6) { alert('Код должен быть 6 символов'); return; }
-  isHost = false;
-  myRoomCode = code;
-  document.getElementById('menuStatus').textContent = 'Подключение...';
-  connectToRoom(myRoomCode);
-};
-
-function connectToRoom(roomId) {
-  ydoc = new Y.Doc();
-  provider = new WebrtcProvider('sea-battle-' + roomId, ydoc, {
-    signaling: [
-      'wss://signaling.yjs.dev',
-      'wss://y-webrtc-signaling-eu.herokuapp.com',
-      'wss://y-webrtc-signaling-us.herokuapp.com'
-    ],
-    rtcConfig: {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun.cloudflare.com:3478' }
-      ]
-    }
-  });
-
-  hostChannel = ydoc.getMap('host');
-  guestChannel = ydoc.getMap('guest');
-
-  // Слушаем изменения в чужом канале
-  const myChannel = isHost ? guestChannel : hostChannel;
-  myChannel.observe(() => {
-    const data = myChannel.get('data');
-    const ts = myChannel.get('ts');
-    if (data && ts) {
-      try {
-        onData(JSON.parse(data));
-      } catch (e) { console.error('Parse error:', e); }
-    }
-  });
-
-  // Ждём подключения второго игрока
-  provider.on('status', (event) => {
-    if (event.status === 'connected' && !connected) {
-      connected = true;
-      // Даём время на синхронизацию
-      setTimeout(() => {
-        document.getElementById('waiting').classList.add('hidden');
-        document.getElementById('setup').classList.remove('hidden');
-        resetSetupState();
-        buildSetupBoard();
-        log('✅ Соперник подключился! Расставьте корабли.');
-      }, 1000);
-    }
-  });
-
-  // Таймаут: если через 30 секунд никто не подключился
-  setTimeout(() => {
-    if (!connected) {
-      document.getElementById('waitingStatus').innerHTML = 
-        '<div class="error-box">⚠️ Не удалось найти соперника за 30 секунд.<br>Возможно, signaling-серверы заблокированы в твоём регионе.<br>Попробуй обновить страницу или используй вариант с ручным обменом кодами.</div>';
-    }
-  }, 30000);
-}
-
-function send(obj) {
-  const channel = isHost ? hostChannel : guestChannel;
-  channel.set('data', JSON.stringify(obj));
-  channel.set('ts', Date.now()); // обязательно меняем, чтобы триггерить observe
-}
-
-function onData(data) {
-  if (data.type === 'rematch') resetGameState();
-  else if (data.type === 'ready') {
-    enemyReady = true; log('👤 Противник готов!');
-    if (ready && isHost) startGame();
-  } else if (data.type === 'start') {
-    myTurn = data.myTurn;
-    document.getElementById('setup').classList.add('hidden');
-    document.getElementById('game').classList.remove('hidden');
-    buildBoard('myBoard'); buildBoard('enemyBoard');
-    updateGameStatus(); log('⚔️ Бой начался!');
-  } else if (data.type === 'shot') handleEnemyShot(data.r, data.c);
-  else if (data.type === 'shotResult') applyMyShotResult(data.r, data.c, data.result, data.cells);
-}
-
-// ===== РАССТАНОВКА =====
-function resetSetupState() {
-  placedShipsData = []; currentShipIndex = 0; isHorizontal = true; ready = false;
-  document.getElementById('readyBtn').disabled = true;
-  document.getElementById('readyBtn').textContent = '✅ Готово';
-  updateShipIndicator();
-}
-
-function getSetupGrid() {
-  const grid = Array.from({length: SIZE}, () => Array(SIZE).fill(0));
-  for (const ship of placedShipsData) {
-    for (const [r, c] of ship.cells) {
-      grid[r][c] = 1;
-      for (let dr = -1; dr <= 1; dr++)
-        for (let dc = -1; dc <= 1; dc++) {
-          const nr = r+dr, nc = c+dc;
-          if (nr>=0 && nr<SIZE && nc>=0 && nc<SIZE && grid[nr][nc]===0) grid[nr][nc] = 2;
+        function loadColors() { const s = localStorage.getItem('lessonColors'); return s ? JSON.parse(s) : {}; }
+        function saveColors(c) { localStorage.setItem('lessonColors', JSON.stringify(c)); }
+        function parseTime(t) {
+            const [s,e] = t.split('-');
+            const [sh,sm] = s.split(':').map(Number);
+            const [eh,em] = e.split(':').map(Number);
+            return { start: new Date().setHours(sh,sm,0,0), end: new Date().setHours(eh,em,0,0) };
         }
-    }
-  }
-  return grid;
-}
-
-function canPlace(r, c, size, h) {
-  const grid = getSetupGrid();
-  if (h) {
-    if (c+size > SIZE) return false;
-    for (let i = 0; i < size; i++) if (grid[r][c+i] !== 0) return false;
-  } else {
-    if (r+size > SIZE) return false;
-    for (let i = 0; i < size; i++) if (grid[r+i][c] !== 0) return false;
-  }
-  return true;
-}
-
-function placeShip(r, c) {
-  if (currentShipIndex >= SHIPS.length) return;
-  const size = SHIPS[currentShipIndex];
-  if (!canPlace(r, c, size, isHorizontal)) return;
-  const cells = [];
-  for (let i = 0; i < size; i++)
-    cells.push([isHorizontal ? r : r+i, isHorizontal ? c+i : c]);
-  placedShipsData.push({ size, horizontal: isHorizontal, cells });
-  currentShipIndex++;
-  updateShipIndicator(); buildSetupBoard();
-  if (currentShipIndex >= SHIPS.length) document.getElementById('readyBtn').disabled = false;
-}
-
-function removeLastShip() {
-  if (placedShipsData.length > 0) {
-    placedShipsData.pop(); currentShipIndex--;
-    updateShipIndicator();
-    document.getElementById('readyBtn').disabled = true;
-    buildSetupBoard();
-  }
-}
-
-function clearSetupBoard() {
-  placedShipsData = []; currentShipIndex = 0;
-  updateShipIndicator();
-  document.getElementById('readyBtn').disabled = true;
-  buildSetupBoard();
-}
-
-function updateShipIndicator() {
-  const el = document.getElementById('shipIndicator');
-  if (currentShipIndex >= SHIPS.length) {
-    el.textContent = 'Все корабли расставлены!';
-    el.style.color = '#22c55e';
-  } else {
-    const size = SHIPS[currentShipIndex];
-    const count = SHIPS.filter(s=>s===size).length - placedShipsData.filter(s=>s.size===size).length;
-    el.textContent = `Ставим: ${size}-палубный (осталось: ${count}) | ${isHorizontal?'Горизонтально':'Вертикально'}`;
-    el.style.color = '#fbbf24';
-  }
-}
-
-function toggleOrientation() {
-  isHorizontal = !isHorizontal;
-  updateShipIndicator(); buildSetupBoard();
-}
-
-function buildSetupBoard() {
-  const t = document.getElementById('myBoardSetup');
-  t.innerHTML = '';
-  const grid = getSetupGrid();
-  for (let r = 0; r < SIZE; r++) {
-    const tr = document.createElement('tr');
-    for (let c = 0; c < SIZE; c++) {
-      const td = document.createElement('td');
-      td.dataset.r = r; td.dataset.c = c;
-      if (grid[r][c] === 1) td.className = 'ship';
-      else {
-        td.className = 'water';
-        td.onclick = () => placeShip(r, c);
-        td.oncontextmenu = (e) => { e.preventDefault(); removeLastShip(); };
-        td.onmouseenter = () => showHover(r, c);
-        td.onmouseleave = () => clearHover();
-      }
-      tr.appendChild(td);
-    }
-    t.appendChild(tr);
-  }
-}
-
-function showHover(r, c) {
-  if (currentShipIndex >= SHIPS.length) return;
-  const size = SHIPS[currentShipIndex];
-  const valid = canPlace(r, c, size, isHorizontal);
-  const cls = valid ? 'hover-valid' : 'hover-invalid';
-  const t = document.getElementById('myBoardSetup');
-  for (let i = 0; i < size; i++) {
-    const hr = isHorizontal ? r : r+i, hc = isHorizontal ? c+i : c;
-    if (hr < SIZE && hc < SIZE && t.rows[hr].cells[hc].className === 'water')
-      t.rows[hr].cells[hc].classList.add(cls);
-  }
-}
-
-function clearHover() {
-  const t = document.getElementById('myBoardSetup');
-  for (let r = 0; r < SIZE; r++)
-    for (let c = 0; c < SIZE; c++)
-      t.rows[r].cells[c].classList.remove('hover-valid', 'hover-invalid');
-}
-
-function randomPlace() {
-  clearSetupBoard();
-  const grid = Array.from({length: SIZE}, () => Array(SIZE).fill(0));
-  for (const size of SHIPS) {
-    let placed = false, attempts = 0;
-    while (!placed && attempts < 500) {
-      attempts++;
-      const h = Math.random() < 0.5;
-      const r = Math.floor(Math.random()*SIZE), c = Math.floor(Math.random()*SIZE);
-      let can = true;
-      if (h) { if (c+size>SIZE) can=false; else for(let i=0;i<size;i++) if(grid[r][c+i]!==0) can=false; }
-      else { if (r+size>SIZE) can=false; else for(let i=0;i<size;i++) if(grid[r+i][c]!==0) can=false; }
-      if (can) {
-        const cells = [];
-        for (let i = 0; i < size; i++) {
-          const nr = h?r:r+i, nc = h?c+i:c;
-          grid[nr][nc] = 1; cells.push([nr, nc]);
-          for (let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) {
-            const rr=nr+dr,cc=nc+dc;
-            if(rr>=0&&rr<SIZE&&cc>=0&&cc<SIZE&&grid[rr][cc]===0) grid[rr][cc]=2;
-          }
+        function updateCurrentTime() {
+            const n = new Date();
+            document.getElementById('currentTime').textContent =
+                n.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}) + ', ' +
+                n.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
         }
-        placedShipsData.push({size, horizontal:h, cells});
-        currentShipIndex++; placed = true;
-      }
-    }
-  }
-  updateShipIndicator(); buildSetupBoard();
-  document.getElementById('readyBtn').disabled = false;
-}
-
-function readySetup() {
-  if (currentShipIndex < SHIPS.length) return alert('Расставьте все корабли!');
-  ready = true;
-  myShips = placedShipsData.map(s => ({ cells: s.cells, hits: 0 }));
-  document.getElementById('readyBtn').disabled = true;
-  document.getElementById('readyBtn').textContent = '⏳ Ожидание...';
-  document.getElementById('setupStatus').textContent = 'Ожидание противника...';
-  send({ type: 'ready' });
-  if (isHost && enemyReady) startGame();
-}
-
-// ===== ИГРА =====
-function resetGameState() {
-  myShips = []; initArrays();
-  ready = false; enemyReady = false; gameOver = false;
-  document.getElementById('game').classList.add('hidden');
-  document.getElementById('setup').classList.remove('hidden');
-  resetSetupState(); buildSetupBoard();
-  document.getElementById('setupStatus').textContent = 'Новая игра!';
-  const btn = document.getElementById('rematchBtn');
-  btn.classList.add('hidden'); btn.disabled = false; btn.textContent = '🔄 Сыграть ещё раз';
-  log('🔄 --- Новая игра ---');
-}
-
-window.requestRematch = function() {
-  const btn = document.getElementById('rematchBtn');
-  btn.disabled = true; btn.textContent = '⏳ Ожидание...';
-  send({ type: 'rematch' });
-  resetGameState();
-}
-
-function buildBoard(id) {
-  const t = document.getElementById(id);
-  t.innerHTML = '';
-  for (let r = 0; r < SIZE; r++) {
-    const tr = document.createElement('tr');
-    for (let c = 0; c < SIZE; c++) {
-      const td = document.createElement('td');
-      td.dataset.r = r; td.dataset.c = c;
-      td.className = 'water';
-      if (id === 'enemyBoard') td.onclick = () => shoot(r, c);
-      tr.appendChild(td);
-    }
-    t.appendChild(tr);
-  }
-}
-
-function startGame() {
-  const hostStarts = Math.random() < 0.5;
-  if (isHost) send({ type: 'start', myTurn: !hostStarts });
-  myTurn = isHost ? hostStarts : !hostStarts;
-  document.getElementById('setup').classList.add('hidden');
-  document.getElementById('game').classList.remove('hidden');
-  buildBoard('myBoard'); buildBoard('enemyBoard');
-  updateGameStatus();
-}
-
-function updateGameStatus() {
-  if (gameOver) return;
-  document.getElementById('gameStatus').textContent = myTurn ? '🎯 ВАШ ХОД!' : '⏳ Ход противника...';
-}
-
-function shoot(r, c) {
-  if (!myTurn || gameOver || myShots[r][c] !== 0) return;
-  myShots[r][c] = 9;
-  send({ type: 'shot', r, c });
-}
-
-function handleEnemyShot(r, c) {
-  let result = 'miss', shipIdx = -1;
-  for (let i = 0; i < myShips.length; i++) {
-    if (myShips[i].cells.some(([rr,cc]) => rr===r && cc===c)) {
-      shipIdx = i; result = 'hit'; break;
-    }
-  }
-  if (shipIdx >= 0) {
-    myShips[shipIdx].hits++;
-    if (myShips[shipIdx].hits === myShips[shipIdx].cells.length) result = 'kill';
-  }
-  const t = document.getElementById('myBoard');
-  if (result === 'miss') { t.rows[r].cells[c].className = 'miss'; t.rows[r].cells[c].textContent = '•'; }
-  else if (result === 'hit') { t.rows[r].cells[c].className = 'hit'; t.rows[r].cells[c].textContent = '✕'; }
-  else if (result === 'kill') markKill(t, myShips[shipIdx].cells, true);
-  log(`🔴 Противник: ${cellName(r,c)} - ${result==='miss'?'промах':result==='hit'?'попадание':'УБИЛ!'}`);
-  send({ type: 'shotResult', r, c, result, cells: result==='kill'?myShips[shipIdx].cells:[] });
-  if (myShips.every(s => s.hits === s.cells.length)) {
-    gameOver = true;
-    document.getElementById('gameStatus').innerHTML = '<div class="lose">💀 ВЫ ПРОИГРАЛИ</div>';
-    document.getElementById('rematchBtn').classList.remove('hidden');
-    return;
-  }
-  myTurn = (result === 'hit' || result === 'kill') ? false : true;
-  updateGameStatus();
-}
-
-function applyMyShotResult(r, c, result, cells) {
-  const t = document.getElementById('enemyBoard');
-  if (result === 'miss') {
-    myShots[r][c] = 1;
-    t.rows[r].cells[c].className = 'miss'; t.rows[r].cells[c].textContent = '•';
-    log(`🔵 Вы: ${cellName(r,c)} - промах`);
-    myTurn = false;
-  } else if (result === 'hit') {
-    myShots[r][c] = 2;
-    t.rows[r].cells[c].className = 'hit'; t.rows[r].cells[c].textContent = '✕';
-    log(`🔵 Вы: ${cellName(r,c)} - ПОПАДАНИЕ!`);
-    myTurn = true;
-  } else if (result === 'kill') {
-    myShots[r][c] = 3;
-    markKill(t, cells, false);
-    log(`🔵 Вы: ${cellName(r,c)} - УНИЧТОЖЕН!`);
-    myTurn = true;
-    let kills = 0;
-    t.querySelectorAll('td.kill').forEach(() => kills++);
-    if (kills === SHIPS.reduce((a,b)=>a+b,0)) {
-      gameOver = true;
-      document.getElementById('gameStatus').innerHTML = '<div class="win">🏆 ПОБЕДА!</div>';
-      document.getElementById('rematchBtn').classList.remove('hidden');
-      return;
-    }
-  }
-  updateGameStatus();
-}
-
-function markKill(table, cells, isMyBoard) {
-  cells.forEach(([r,c]) => {
-    table.rows[r].cells[c].className = 'kill';
-    table.rows[r].cells[c].textContent = '✕';
-  });
-  cells.forEach(([r,c]) => {
-    for (let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) {
-      const rr=r+dr,cc=c+dc;
-      if(rr>=0&&rr<SIZE&&cc>=0&&cc<SIZE) {
-        const td = table.rows[rr].cells[cc];
-        if (td.className === 'water') {
-          td.className = 'miss'; td.textContent = '•';
-          if (!isMyBoard) myShots[rr][cc] = 1;
+        function updateStats() {
+            const dayName = days[currentDay];
+            const lessons = schedule[dayName];
+            document.getElementById('totalLessons').textContent = lessons.length;
+            if (lessons.length > 0) {
+                document.getElementById('firstLesson').textContent = lessons[0].time.split('-')[0];
+                document.getElementById('lastLesson').textContent = lessons[lessons.length - 1].time.split('-')[1];
+            } else {
+                document.getElementById('firstLesson').textContent = '-';
+                document.getElementById('lastLesson').textContent = '-';
+            }
         }
-      }
-    }
-  });
-}
+        function renderAnnouncements() {
+            const list = document.getElementById('announcementsList');
+            list.innerHTML = announcements.map(a => 
+                `<div class="announcement-item">${a.text}<div class="announcement-date">${a.date}</div></div>`
+            ).join('');
+        }
+        function renderDaysNav() {
+            const nav = document.getElementById('daysNav');
+            nav.innerHTML = '';
+            days.forEach((d,i) => {
+                const b = document.createElement('button');
+                b.className = 'day-btn ' + (i === currentDay ? 'active' : '');
+                b.textContent = d;
+                b.onclick = () => { currentDay = i; renderDaysNav(); renderSchedule(); };
+                nav.appendChild(b);
+            });
+            setTimeout(() => {
+                const activeBtn = nav.querySelector('.day-btn.active');
+                if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }, 50);
+        }
+        function renderSchedule() {
+            const div = document.getElementById('schedule');
+            const dayName = days[currentDay];
+            const lessons = schedule[dayName];
+            const lc = loadColors();
+            if (lessons.length === 0) {
+                div.innerHTML = '<div class="no-lessons"><div class="emoji">🎉</div><div>Выходной</div></div>';
+                return;
+            }
+            const now = new Date();
+            const todayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
+            const isToday = currentDay === todayIndex;
+            let html = '';
+            lessons.forEach((lesson, index) => {
+                const times = parseTime(lesson.time);
+                let status = '', cardClass = '', progressHtml = '', timerHtml = '';
+                const colorKey = dayName + '-' + lesson.name;
+                const lessonColor = lc[colorKey] || '#5a7d9a';
+                const icon = lesson.icon || '📚';
+                
+                if (isToday && now.getTime() >= times.start && now.getTime() <= times.end) {
+                    status = '<span class="status-badge status-current">Сейчас</span>';
+                    cardClass = 'current';
+                    const total = times.end - times.start;
+                    const elapsed = now.getTime() - times.start;
+                    const progress = (elapsed / total) * 100;
+                    const remaining = Math.ceil((times.end - now.getTime()) / 60000);
+                    progressHtml = `<div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>`;
+                    timerHtml = `<span class="timer-badge">⏱ ${remaining} мин</span>`;
+                } else if (isToday && now.getTime() < times.start &&
+                           (index === 0 || now.getTime() > parseTime(lessons[index-1].time).end)) {
+                    status = '<span class="status-badge status-next">Следующая</span>';
+                    cardClass = 'next';
+                    const minutesToStart = Math.ceil((times.start - now.getTime()) / 60000);
+                    timerHtml = `<span class="timer-badge" style="background: #ffc107; color: #333">⏱ через ${minutesToStart} мин</span>`;
+                } else {
+                    status = '<span class="status-badge status-upcoming">Предстоит</span>';
+                }
+                html += '<div class="lesson-card ' + cardClass + '" style="border-left-color:' + lessonColor + '" onclick="openColorModal(\'' + colorKey + '\',\'' + lessonColor + '\')">' +
+                    '<div class="lesson-header">' +
+                        '<div class="lesson-number-wrap">' +
+                            '<div class="lesson-number" style="background:' + lessonColor + '">' + (index+1) + '</div>' +
+                            '<span class="lesson-time">' + lesson.time + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="lesson-name"><span class="lesson-icon">' + icon + '</span>' + lesson.name + '</div>' +
+                    '<div class="lesson-details">' +
+                        '<div class="detail-item"><span class="icon">🚪</span><span>Каб. ' + lesson.room + '</span></div>' +
+                        '<div class="detail-item"><span class="icon">👨‍🏫</span><span>' + lesson.teacher + '</span></div>' +
+                    '</div>' + status + timerHtml + progressHtml + '</div>';
+            });
+            div.innerHTML = html;
+        }
+        function openColorModal(key, color) {
+            selectedLesson = key;
+            const picker = document.getElementById('colorPicker');
+            picker.innerHTML = '';
+            colors.forEach(c => {
+                const o = document.createElement('div');
+                o.className = 'color-option' + (c === color ? ' selected' : '');
+                o.style.background = c;
+                o.onclick = () => selectColor(c);
+                picker.appendChild(o);
+            });
+            document.getElementById('colorModal').classList.add('active');
+        }
+        function selectColor(color) {
+            const lc = loadColors();
+            lc[selectedLesson] = color;
+            saveColors(lc);
+            closeModal();
+            renderSchedule();
+        }
+        function closeModal() {
+            document.getElementById('colorModal').classList.remove('active');
+            selectedLesson = null;
+        }
 
-function cellName(r, c) { return String.fromCharCode(65+c) + (r+1); }
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
 
-function log(msg) {
-  const l = document.getElementById('log');
-  const d = document.createElement('div');
-  d.textContent = new Date().toLocaleTimeString().slice(0,5) + ' | ' + msg;
-  l.insertBefore(d, l.firstChild);
-}
+        function handleSwipe() {
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
+            const threshold = 50;
+            if (Math.abs(diffX) < threshold || Math.abs(diffX) < Math.abs(diffY)) return;
+            if (diffX > 0 && currentDay < days.length - 1) {
+                currentDay++;
+            } else if (diffX < 0 && currentDay > 0) {
+                currentDay--;
+            } else {
+                return;
+            }
+            const scheduleEl = document.getElementById('schedule');
+            scheduleEl.classList.add('swiping');
+            scheduleEl.style.transform = diffX > 0 ? 'translateX(-15px)' : 'translateX(15px)';
+            setTimeout(() => {
+                scheduleEl.style.transform = 'translateX(0)';
+                scheduleEl.classList.remove('swiping');
+            }, 50);
+            renderDaysNav();
+            renderSchedule();
+            updateStats();
+        }
 
-function copyToClipboard(id) {
-  const el = document.getElementById(id);
-  const text = el.textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    alert('✅ Код скопирован!');
-  }).catch(() => {
-    el.select(); document.execCommand('copy');
-    alert('✅ Код скопирован!');
-  });
-}
-window.copyToClipboard = copyToClipboard;
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
 
-document.addEventListener('keydown', (e) => {
-  if ((e.key==='r'||e.key==='R'||e.key==='к'||e.key==='К') && !document.getElementById('setup').classList.contains('hidden'))
-    toggleOrientation();
-});
-</script>
+        let mouseDown = false;
+        let mouseStartY = 0;
+        document.addEventListener('mousedown', e => { mouseDown = true; touchStartX = e.screenX; mouseStartY = e.screenY; });
+        document.addEventListener('mouseup', e => {
+            if (!mouseDown) return;
+            mouseDown = false;
+            touchEndX = e.screenX;
+            touchEndY = e.screenY;
+            touchStartY = mouseStartY;
+            handleSwipe();
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' && currentDay < days.length - 1) { currentDay++; renderDaysNav(); renderSchedule(); updateStats(); }
+            else if (e.key === 'ArrowLeft' && currentDay > 0) { currentDay--; renderDaysNav(); renderSchedule(); updateStats(); }
+        });
+
+        function startAutoSwitch() {
+            if (window.innerWidth >= 768 && window.innerHeight > window.innerWidth) {
+                autoSwitchInterval = setInterval(() => {
+                    currentDay = (currentDay + 1) % days.length;
+                    renderDaysNav();
+                    renderSchedule();
+                    updateStats();
+                }, 10000);
+            }
+        }
+
+        function stopAutoSwitch() {
+            if (autoSwitchInterval) {
+                clearInterval(autoSwitchInterval);
+                autoSwitchInterval = null;
+            }
+        }
+
+        updateCurrentTime();
+        renderDaysNav();
+        renderSchedule();
+        updateStats();
+        renderAnnouncements();
+        startAutoSwitch();
+        
+        setInterval(() => { updateCurrentTime(); renderSchedule(); }, 60000);
+        
+        document.getElementById('colorModal').addEventListener('click', e => { if (e.target.id === 'colorModal') closeModal(); });
+
+        window.addEventListener('resize', () => {
+            stopAutoSwitch();
+            startAutoSwitch();
+        });
+    </script>
 </body>
 </html>
