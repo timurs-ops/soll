@@ -12,6 +12,7 @@
             min-height: 100vh;
             padding: 8px;
             overflow-x: hidden;
+            touch-action: pan-y;
         }
         .container { max-width: 480px; margin: 0 auto; }
         .header {
@@ -292,7 +293,7 @@
             days.forEach((d,i) => {
                 const b = document.createElement('button');
                 b.className = 'day-btn ' + (i === currentDay ? 'active' : '');
-                b.textContent = d.substring(0, 3);
+                b.textContent = d;
                 b.onclick = () => { currentDay = i; renderDaysNav(); renderSchedule(); };
                 nav.appendChild(b);
             });
@@ -370,22 +371,26 @@
         }
 
         let touchStartX = 0;
+        let touchStartY = 0;
         let touchEndX = 0;
-        const scheduleEl = document.getElementById('schedule');
+        let touchEndY = 0;
 
         function handleSwipe() {
-            const diff = touchStartX - touchEndX;
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
             const threshold = 50;
-            if (Math.abs(diff) < threshold) return;
-            if (diff > 0 && currentDay < days.length - 1) {
+            // Свайп должен быть горизонтальным (по X больше, чем по Y)
+            if (Math.abs(diffX) < threshold || Math.abs(diffX) < Math.abs(diffY)) return;
+            if (diffX > 0 && currentDay < days.length - 1) {
                 currentDay++;
-            } else if (diff < 0 && currentDay > 0) {
+            } else if (diffX < 0 && currentDay > 0) {
                 currentDay--;
             } else {
                 return;
             }
+            const scheduleEl = document.getElementById('schedule');
             scheduleEl.classList.add('swiping');
-            scheduleEl.style.transform = diff > 0 ? 'translateX(-15px)' : 'translateX(15px)';
+            scheduleEl.style.transform = diffX > 0 ? 'translateX(-15px)' : 'translateX(15px)';
             setTimeout(() => {
                 scheduleEl.style.transform = 'translateX(0)';
                 scheduleEl.classList.remove('swiping');
@@ -394,12 +399,29 @@
             renderSchedule();
         }
 
-        scheduleEl.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-        scheduleEl.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, { passive: true });
+        // Свайп по всему экрану
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
+
         let mouseDown = false;
-        scheduleEl.addEventListener('mousedown', e => { mouseDown = true; touchStartX = e.screenX; });
-        scheduleEl.addEventListener('mouseup', e => { if (!mouseDown) return; mouseDown = false; touchEndX = e.screenX; handleSwipe(); });
-        scheduleEl.addEventListener('mouseleave', () => { mouseDown = false; });
+        let mouseStartY = 0;
+        document.addEventListener('mousedown', e => { mouseDown = true; touchStartX = e.screenX; mouseStartY = e.screenY; });
+        document.addEventListener('mouseup', e => {
+            if (!mouseDown) return;
+            mouseDown = false;
+            touchEndX = e.screenX;
+            touchEndY = e.screenY;
+            touchStartY = mouseStartY;
+            handleSwipe();
+        });
+
         document.addEventListener('keydown', e => {
             if (e.key === 'ArrowRight' && currentDay < days.length - 1) { currentDay++; renderDaysNav(); renderSchedule(); }
             else if (e.key === 'ArrowLeft' && currentDay > 0) { currentDay--; renderDaysNav(); renderSchedule(); }
