@@ -247,27 +247,34 @@
         let selectedLesson = null;
         const colors = ['#A8D8EA','#AA96DA','#FCBAD3','#FFFFD2','#A8E6CF','#FFD3B6','#D4A5A5','#B5EAD7','#C7CEEA','#F8B195','#E2F0CB','#FFDAC1'];
 
-        async function fetchProxy(url) {
-            try {
-                const resp = await fetch(PROXY + encodeURIComponent(url));
-                if (!resp.ok) return null;
-                return await resp.text();
-            } catch { return null; }
-        }
+        // Список рабочих прокси — перебираем по очереди, пока один не ответит
+        const PROXIES = [
+            url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+            url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
+            url => 'https://corsproxy.io/?' + encodeURIComponent(url)
+        ];
 
-        async function refreshData(type) {
-            const btn = document.getElementById(type === 'group' ? 'refreshGroupBtn' : 'refreshTeacherBtn');
-            btn.disabled = true; btn.textContent = '⏳ Загрузка с сервера...';
-            
-            if (type === 'group' && groupsData.length === 0) {
-                const html = await fetchProxy(BASE_URL + '/cg.htm');
-                if (html) { groupsData = parseList(html, 'cg'); localStorage.setItem('kitis_groups', JSON.stringify(groupsData)); }
+        async function fetchProxy(url) {
+            for (const makeUrl of PROXIES) {
+                try {
+                    const resp = await fetch(makeUrl(url));
+                    if (!resp.ok) continue;
+
+                    // ВАЖНО: читаем байты и декодируем как windows-1251
+                    const buf = await resp.arrayBuffer();
+                    const html = new TextDecoder('windows-1251').decode(buf);
+
+                    // Прокси иногда вместо страницы отдаёт свой HTML с ошибкой — отсекаем
+                    if (!html || html.length < 300) continue;
+                    if (/Not Found|Forbidden|Access Denied|captcha/i.test(html.slice(0, 2000)) && !/cg\d+\.htm|Список групп/i.test(html)) continue;
+
+                    return html;
+                } catch (e) {
+                    // пробуем следующий прокси
+                }
             }
-            if (type === 'teacher' && teachersData.length === 0) {
-                const html = await fetchProxy(BASE_URL + '/cp.htm');
-                if (html) { teachersData = parseList(html, 'cp'); localStorage.setItem('kitis_teachers', JSON.stringify(teachersData)); }
-            }
-            
+            return null;
+        }
             btn.textContent = '✅ Обновлено!';
             setTimeout(() => { btn.textContent = '🔄 Загрузить с сайта КИТИС'; btn.disabled = false; }, 1500);
             renderList(type);
