@@ -27,9 +27,110 @@
             padding: 16px;
             margin-bottom: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
         }
-        .header h1 { color: #333; font-size: 20px; margin-bottom: 6px; font-weight: 700; }
+        .header:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0,0,0,0.15); }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .header h1 { color: #333; font-size: 20px; font-weight: 700; }
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .group-badge {
+            background: #5a7d9a;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .info-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #555;
+            transition: transform 0.3s;
+        }
+        .header.open .info-icon { transform: rotate(180deg); }
         .current-time { color: #666; font-size: 13px; }
+        
+        /* Выпадающая панель с преподавателями */
+        .info-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease, margin 0.4s ease;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-top: 0;
+        }
+        .header.open .info-panel {
+            max-height: 500px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        .info-panel h3 {
+            font-size: 12px;
+            color: #5a7d9a;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .group-switcher {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .group-btn {
+            padding: 6px 12px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .group-btn.active {
+            background: #5a7d9a;
+            color: white;
+            border-color: #5a7d9a;
+        }
+        .teacher-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .teacher-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            background: white;
+            border-radius: 8px;
+            font-size: 11px;
+        }
+        .teacher-name {
+            font-weight: 600;
+            color: #333;
+        }
+        .teacher-subject {
+            color: #666;
+            font-size: 10px;
+        }
         
         .stats-bar {
             background: rgba(255,255,255,0.95);
@@ -304,6 +405,13 @@
             .header { padding: 32px; margin-bottom: 24px; }
             .header h1 { font-size: 48px; margin-bottom: 12px; }
             .current-time { font-size: 28px; }
+            .group-badge { font-size: 22px; padding: 8px 18px; }
+            .info-icon { width: 40px; height: 40px; font-size: 22px; }
+            .info-panel h3 { font-size: 22px; margin-bottom: 16px; }
+            .group-btn { padding: 12px 20px; font-size: 20px; }
+            .teacher-item { padding: 12px 16px; font-size: 20px; }
+            .teacher-name { font-size: 22px; }
+            .teacher-subject { font-size: 18px; }
             .stats-bar { padding: 20px; margin-bottom: 24px; font-size: 18px; }
             .stat-value { font-size: 28px; }
             .days-nav { gap: 16px; margin-bottom: 24px; padding-bottom: 16px; }
@@ -335,9 +443,21 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📚 Расписание</h1>
+        <div class="header" id="header" onclick="toggleInfoPanel(event)">
+            <div class="header-top">
+                <h1>📚 Расписание</h1>
+                <div class="header-info">
+                    <span class="group-badge" id="groupBadge">Группа 101</span>
+                    <div class="info-icon">ℹ</div>
+                </div>
+            </div>
             <div class="current-time" id="currentTime"></div>
+            
+            <div class="info-panel" id="infoPanel" onclick="event.stopPropagation()">
+                <h3>👥 Преподаватели на сегодня</h3>
+                <div class="group-switcher" id="groupSwitcher"></div>
+                <div class="teacher-list" id="teacherList"></div>
+            </div>
         </div>
         
         <div class="stats-bar" id="statsBar">
@@ -372,40 +492,77 @@
         </div>
     </div>
     <script>
-        const schedule = {
-            'Понедельник': [
-                { time: '8:30-10:00', name: 'Математика', room: '120', teacher: 'Иванов', icon: '📐' },
-                { time: '10:15-11:45', name: 'Физика', room: '205', teacher: 'Петров', icon: '🔬' },
-                { time: '12:00-13:30', name: 'Информатика', room: '310', teacher: 'Сидоров', icon: '💻' },
-                { time: '13:45-15:15', name: 'Английский', room: '115', teacher: 'Смирнова', icon: '🌍' }
-            ],
-            'Вторник': [
-                { time: '8:30-10:00', name: 'История', room: '220', teacher: 'Козлов', icon: '📜' },
-                { time: '10:15-11:45', name: 'Литература', room: '118', teacher: 'Новикова', icon: '📖' },
-                { time: '12:00-13:30', name: 'Биология', room: '305', teacher: 'Морозов', icon: '🧬' }
-            ],
-            'Среда': [
-                { time: '8:30-10:00', name: 'Химия', room: '215', teacher: 'Волков', icon: '⚗️' },
-                { time: '10:15-11:45', name: 'География', room: '208', teacher: 'Соколов', icon: '🌍' },
-                { time: '12:00-13:30', name: 'Физкультура', room: 'Спортзал', teacher: 'Лебедев', icon: '⚽' },
-                { time: '13:45-15:15', name: 'ОБЖ', room: '112', teacher: 'Попов', icon: '🛡️' }
-            ],
-            'Четверг': [
-                { time: '8:30-10:00', name: 'Обществознание', room: '225', teacher: 'Васильев', icon: '🏛️' },
-                { time: '10:15-11:45', name: 'Математика', room: '120', teacher: 'Иванов', icon: '📐' },
-                { time: '12:00-13:30', name: 'Информатика', room: '310', teacher: 'Сидоров', icon: '💻' }
-            ],
-            'Пятница': [
-                { time: '8:30-10:00', name: 'Физика', room: '205', teacher: 'Петров', icon: '🔬' },
-                { time: '10:15-11:45', name: 'Английский', room: '115', teacher: 'Смирнова', icon: '🌍' },
-                { time: '12:00-13:30', name: 'Литература', room: '118', teacher: 'Новикова', icon: '📖' },
-                { time: '13:45-15:15', name: 'История', room: '220', teacher: 'Козлов', icon: '📜' }
-            ],
-            'Суббота': [
-                { time: '8:30-10:00', name: 'Биология', room: '305', teacher: 'Морозов', icon: '🧬' },
-                { time: '10:15-11:45', name: 'Химия', room: '215', teacher: 'Волков', icon: '⚗️' }
-            ],
-            'Воскресенье': []
+        // Расписание для разных групп
+        const scheduleByGroup = {
+            '101': {
+                'Понедельник': [
+                    { time: '8:30-10:00', name: 'Математика', room: '120', teacher: 'Иванов И.И.', icon: '📐' },
+                    { time: '10:15-11:45', name: 'Физика', room: '205', teacher: 'Петров П.П.', icon: '🔬' },
+                    { time: '12:00-13:30', name: 'Информатика', room: '310', teacher: 'Сидоров С.С.', icon: '💻' },
+                    { time: '13:45-15:15', name: 'Английский', room: '115', teacher: 'Смирнова А.А.', icon: '🌍' }
+                ],
+                'Вторник': [
+                    { time: '8:30-10:00', name: 'История', room: '220', teacher: 'Козлов К.К.', icon: '📜' },
+                    { time: '10:15-11:45', name: 'Литература', room: '118', teacher: 'Новикова Н.Н.', icon: '📖' },
+                    { time: '12:00-13:30', name: 'Биология', room: '305', teacher: 'Морозов М.М.', icon: '🧬' }
+                ],
+                'Среда': [
+                    { time: '8:30-10:00', name: 'Химия', room: '215', teacher: 'Волков В.В.', icon: '⚗️' },
+                    { time: '10:15-11:45', name: 'География', room: '208', teacher: 'Соколов С.С.', icon: '🌍' },
+                    { time: '12:00-13:30', name: 'Физкультура', room: 'Спортзал', teacher: 'Лебедев Л.Л.', icon: '⚽' },
+                    { time: '13:45-15:15', name: 'ОБЖ', room: '112', teacher: 'Попов П.П.', icon: '🛡️' }
+                ],
+                'Четверг': [
+                    { time: '8:30-10:00', name: 'Обществознание', room: '225', teacher: 'Васильев В.В.', icon: '🏛️' },
+                    { time: '10:15-11:45', name: 'Математика', room: '120', teacher: 'Иванов И.И.', icon: '📐' },
+                    { time: '12:00-13:30', name: 'Информатика', room: '310', teacher: 'Сидоров С.С.', icon: '💻' }
+                ],
+                'Пятница': [
+                    { time: '8:30-10:00', name: 'Физика', room: '205', teacher: 'Петров П.П.', icon: '🔬' },
+                    { time: '10:15-11:45', name: 'Английский', room: '115', teacher: 'Смирнова А.А.', icon: '🌍' },
+                    { time: '12:00-13:30', name: 'Литература', room: '118', teacher: 'Новикова Н.Н.', icon: '📖' },
+                    { time: '13:45-15:15', name: 'История', room: '220', teacher: 'Козлов К.К.', icon: '📜' }
+                ],
+                'Суббота': [
+                    { time: '8:30-10:00', name: 'Биология', room: '305', teacher: 'Морозов М.М.', icon: '🧬' },
+                    { time: '10:15-11:45', name: 'Химия', room: '215', teacher: 'Волков В.В.', icon: '⚗️' }
+                ],
+                'Воскресенье': []
+            },
+            '102': {
+                'Понедельник': [
+                    { time: '8:30-10:00', name: 'Литература', room: '118', teacher: 'Новикова Н.Н.', icon: '📖' },
+                    { time: '10:15-11:45', name: 'Математика', room: '120', teacher: 'Иванов И.И.', icon: '📐' },
+                    { time: '12:00-13:30', name: 'Биология', room: '305', teacher: 'Морозов М.М.', icon: '🧬' }
+                ],
+                'Вторник': [
+                    { time: '8:30-10:00', name: 'Физика', room: '205', teacher: 'Петров П.П.', icon: '🔬' },
+                    { time: '10:15-11:45', name: 'История', room: '220', teacher: 'Козлов К.К.', icon: '📜' },
+                    { time: '12:00-13:30', name: 'Английский', room: '115', teacher: 'Смирнова А.А.', icon: '🌍' },
+                    { time: '13:45-15:15', name: 'Информатика', room: '310', teacher: 'Сидоров С.С.', icon: '💻' }
+                ],
+                'Среда': [
+                    { time: '8:30-10:00', name: 'Химия', room: '215', teacher: 'Волков В.В.', icon: '⚗️' },
+                    { time: '10:15-11:45', name: 'Обществознание', room: '225', teacher: 'Васильев В.В.', icon: '🏛️' },
+                    { time: '12:00-13:30', name: 'География', room: '208', teacher: 'Соколов С.С.', icon: '🌍' }
+                ],
+                'Четверг': [
+                    { time: '8:30-10:00', name: 'Информатика', room: '310', teacher: 'Сидоров С.С.', icon: '💻' },
+                    { time: '10:15-11:45', name: 'Физкультура', room: 'Спортзал', teacher: 'Лебедев Л.Л.', icon: '⚽' },
+                    { time: '12:00-13:30', name: 'Математика', room: '120', teacher: 'Иванов И.И.', icon: '📐' },
+                    { time: '13:45-15:15', name: 'ОБЖ', room: '112', teacher: 'Попов П.П.', icon: '🛡️' }
+                ],
+                'Пятница': [
+                    { time: '8:30-10:00', name: 'Литература', room: '118', teacher: 'Новикова Н.Н.', icon: '📖' },
+                    { time: '10:15-11:45', name: 'Биология', room: '305', teacher: 'Морозов М.М.', icon: '🧬' },
+                    { time: '12:00-13:30', name: 'История', room: '220', teacher: 'Козлов К.К.', icon: '📜' }
+                ],
+                'Суббота': [
+                    { time: '8:30-10:00', name: 'Английский', room: '115', teacher: 'Смирнова А.А.', icon: '🌍' },
+                    { time: '10:15-11:45', name: 'Химия', room: '215', teacher: 'Волков В.В.', icon: '⚗️' }
+                ],
+                'Воскресенье': []
+            }
         };
         
         const announcements = [
@@ -416,13 +573,16 @@
         
         const colors = ['#A8D8EA','#AA96DA','#FCBAD3','#FFFFD2','#A8E6CF','#FFD3B6','#D4A5A5','#B5EAD7','#C7CEEA','#F8B195','#E2F0CB','#FFDAC1'];
         const days = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+        const groups = Object.keys(scheduleByGroup);
+        let currentGroup = localStorage.getItem('currentGroup') || groups[0];
         let currentDay = new Date().getDay();
         currentDay = currentDay === 0 ? 6 : currentDay - 1;
         let selectedLesson = null;
         let autoSwitchInterval = null;
 
-        function loadColors() { const s = localStorage.getItem('lessonColors'); return s ? JSON.parse(s) : {}; }
-        function saveColors(c) { localStorage.setItem('lessonColors', JSON.stringify(c)); }
+        function getSchedule() { return scheduleByGroup[currentGroup]; }
+        function loadColors() { const s = localStorage.getItem('lessonColors_' + currentGroup); return s ? JSON.parse(s) : {}; }
+        function saveColors(c) { localStorage.setItem('lessonColors_' + currentGroup, JSON.stringify(c)); }
         function parseTime(t) {
             const [s,e] = t.split('-');
             const [sh,sm] = s.split(':').map(Number);
@@ -435,9 +595,12 @@
                 n.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}) + ', ' +
                 n.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
         }
+        function updateGroupBadge() {
+            document.getElementById('groupBadge').textContent = 'Группа ' + currentGroup;
+        }
         function updateStats() {
             const dayName = days[currentDay];
-            const lessons = schedule[dayName];
+            const lessons = getSchedule()[dayName] || [];
             document.getElementById('totalLessons').textContent = lessons.length;
             if (lessons.length > 0) {
                 document.getElementById('firstLesson').textContent = lessons[0].time.split('-')[0];
@@ -452,6 +615,54 @@
             list.innerHTML = announcements.map(a => 
                 `<div class="announcement-item">${a.text}<div class="announcement-date">${a.date}</div></div>`
             ).join('');
+        }
+        function renderGroupSwitcher() {
+            const switcher = document.getElementById('groupSwitcher');
+            switcher.innerHTML = groups.map(g => 
+                `<button class="group-btn ${g === currentGroup ? 'active' : ''}" onclick="switchGroup('${g}')">Группа ${g}</button>`
+            ).join('');
+        }
+        function renderTeacherList() {
+            const list = document.getElementById('teacherList');
+            const dayName = days[currentDay];
+            const lessons = getSchedule()[dayName] || [];
+            if (lessons.length === 0) {
+                list.innerHTML = '<div class="teacher-item"><span class="teacher-name">Выходной — преподавателей нет</span></div>';
+                return;
+            }
+            // Убираем дубликаты преподавателей
+            const uniqueTeachers = [];
+            const seen = new Set();
+            lessons.forEach(l => {
+                if (!seen.has(l.teacher)) {
+                    seen.add(l.teacher);
+                    uniqueTeachers.push(l);
+                }
+            });
+            list.innerHTML = uniqueTeachers.map(l => 
+                `<div class="teacher-item">
+                    <div>
+                        <div class="teacher-name">${l.icon} ${l.teacher}</div>
+                        <div class="teacher-subject">${l.name}</div>
+                    </div>
+                </div>`
+            ).join('');
+        }
+        function toggleInfoPanel(event) {
+            const header = document.getElementById('header');
+            header.classList.toggle('open');
+            if (header.classList.contains('open')) {
+                renderTeacherList();
+            }
+        }
+        function switchGroup(group) {
+            currentGroup = group;
+            localStorage.setItem('currentGroup', group);
+            updateGroupBadge();
+            renderGroupSwitcher();
+            renderTeacherList();
+            renderSchedule();
+            updateStats();
         }
         function renderDaysNav() {
             const nav = document.getElementById('daysNav');
@@ -471,7 +682,7 @@
         function renderSchedule() {
             const div = document.getElementById('schedule');
             const dayName = days[currentDay];
-            const lessons = schedule[dayName];
+            const lessons = getSchedule()[dayName] || [];
             const lc = loadColors();
             if (lessons.length === 0) {
                 div.innerHTML = '<div class="no-lessons"><div class="emoji">🎉</div><div>Выходной</div></div>';
@@ -621,6 +832,8 @@
         }
 
         updateCurrentTime();
+        updateGroupBadge();
+        renderGroupSwitcher();
         renderDaysNav();
         renderSchedule();
         updateStats();
