@@ -59,20 +59,11 @@
             gap: 4px;
         }
         .badge:hover { transform: scale(1.05); }
-        .group-badge {
-            background: #5a7d9a;
-            color: white;
-        }
+        .group-badge { background: #5a7d9a; color: white; }
         .group-badge:hover { background: #4a6d8a; }
-        .teacher-badge {
-            background: #7a9bb5;
-            color: white;
-        }
+        .teacher-badge { background: #7a9bb5; color: white; }
         .teacher-badge:hover { background: #6a8ba5; }
-        .badge.inactive {
-            background: #e0e0e0;
-            color: #999;
-        }
+        .badge.inactive { background: #e0e0e0; color: #999; }
         .mode-indicator {
             font-size: 10px;
             padding: 2px 6px;
@@ -81,8 +72,7 @@
             font-weight: 500;
         }
         .info-icon {
-            width: 24px;
-            height: 24px;
+            width: 24px; height: 24px;
             border-radius: 50%;
             background: #e0e0e0;
             display: flex;
@@ -128,14 +118,8 @@
             border-radius: 8px;
             font-size: 11px;
         }
-        .teacher-name {
-            font-weight: 600;
-            color: #333;
-        }
-        .teacher-subject {
-            color: #666;
-            font-size: 10px;
-        }
+        .teacher-name { font-weight: 600; color: #333; }
+        .teacher-subject { color: #666; font-size: 10px; }
         
         .stats-bar {
             background: rgba(255,255,255,0.95);
@@ -203,7 +187,6 @@
         .schedule.swiping { transition: none; }
         
         .lesson-card {
-            background: #f8f9fa;
             border-radius: 12px;
             padding: 14px;
             margin-bottom: 12px;
@@ -211,15 +194,24 @@
             transition: all 0.3s;
             cursor: pointer;
             position: relative;
+            overflow: hidden;
         }
         .lesson-card:last-child { margin-bottom: 0; }
-        .lesson-card.current {
-            background: #e8f4f8;
-            border-left-color: #28a745;
+        
+        /* Обычные карточки */
+        .lesson-card.upcoming {
+            background: #f8f9fa;
         }
+        
+        /* Следующая пара — жёлтый фон */
         .lesson-card.next {
-            background: #fff3cd;
+            background: linear-gradient(to right, #fff3cd 0%, #fff3cd 100%);
             border-left-color: #ffc107;
+        }
+        
+        /* Текущая пара — фон заполняется зелёным по мере прохождения времени */
+        .lesson-card.current {
+            border-left-color: #28a745;
         }
         
         .lesson-header {
@@ -227,6 +219,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
         }
         .lesson-number-wrap {
             display: flex;
@@ -255,6 +249,8 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            position: relative;
+            z-index: 2;
         }
         .lesson-icon {
             font-size: 18px;
@@ -265,6 +261,8 @@
             gap: 12px; 
             flex-wrap: nowrap;
             overflow: hidden;
+            position: relative;
+            z-index: 2;
         }
         .detail-item { 
             display: flex; 
@@ -286,25 +284,12 @@
             font-size: 11px;
             font-weight: 600;
             margin-top: 8px;
+            position: relative;
+            z-index: 2;
         }
         .status-current { background: #28a745; color: white; }
         .status-next { background: #ffc107; color: #333; }
         .status-upcoming { background: #e9ecef; color: #666; }
-        
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: #28a745;
-            border-radius: 2px;
-            transition: width 1s linear;
-        }
         
         .timer-badge {
             display: inline-block;
@@ -316,6 +301,8 @@
             font-weight: 600;
             margin-top: 6px;
             margin-left: 8px;
+            position: relative;
+            z-index: 2;
         }
         
         .announcements {
@@ -483,7 +470,6 @@
             .detail-item { font-size: 22px; gap: 8px; }
             .detail-item .icon { font-size: 28px; }
             .status-badge { padding: 8px 20px; font-size: 20px; margin-top: 16px; }
-            .progress-bar { height: 8px; margin-top: 16px; }
             .timer-badge { padding: 6px 14px; font-size: 18px; margin-top: 12px; margin-left: 12px; }
             .announcements { padding: 24px; margin-bottom: 24px; }
             .announcements h3 { font-size: 22px; margin-bottom: 16px; }
@@ -544,7 +530,6 @@
         <div class="swipe-hint">Свайп для смены дня 👉</div>
     </div>
     
-    <!-- Модалка выбора группы -->
     <div class="modal" id="groupModal">
         <div class="modal-content">
             <h3>Выберите группу</h3>
@@ -553,7 +538,6 @@
         </div>
     </div>
     
-    <!-- Модалка выбора преподавателя -->
     <div class="modal" id="teacherModal">
         <div class="modal-content">
             <h3>Выберите преподавателя</h3>
@@ -563,7 +547,6 @@
         </div>
     </div>
     
-    <!-- Модалка выбора цвета -->
     <div class="modal" id="colorModal">
         <div class="modal-content">
             <h3>Цвет предмета</h3>
@@ -573,7 +556,6 @@
     </div>
     
     <script>
-        // Расписание групп
         const scheduleByGroup = {
             '101': {
                 'Понедельник': [
@@ -680,7 +662,6 @@
             }
         };
         
-        // Расписание преподавателей (автоматически генерируется из расписания групп)
         const teacherSchedule = {};
         Object.keys(scheduleByGroup).forEach(groupId => {
             const groupSchedule = scheduleByGroup[groupId];
@@ -815,7 +796,6 @@
             }
         }
         
-        // ===== МОДАЛКА ГРУПП =====
         function openGroupModal(event) {
             event.stopPropagation();
             const modal = document.getElementById('groupModal');
@@ -844,7 +824,6 @@
             document.getElementById('groupModal').classList.remove('active');
         }
         
-        // ===== МОДАЛКА ПРЕПОДАВАТЕЛЕЙ =====
         function openTeacherModal(event) {
             event.stopPropagation();
             const modal = document.getElementById('teacherModal');
@@ -917,7 +896,7 @@
             let html = '';
             lessons.forEach((lesson, index) => {
                 const times = parseTime(lesson.time);
-                let status = '', cardClass = '', progressHtml = '', timerHtml = '';
+                let status = '', cardClass = '', timerHtml = '', bgStyle = '';
                 const colorKey = dayName + '-' + lesson.name + (lesson.group ? '-' + lesson.group : '');
                 const lessonColor = lc[colorKey] || '#5a7d9a';
                 const icon = lesson.icon || '📚';
@@ -927,9 +906,10 @@
                     cardClass = 'current';
                     const total = times.end - times.start;
                     const elapsed = now.getTime() - times.start;
-                    const progress = (elapsed / total) * 100;
+                    const progress = Math.min(100, Math.max(0, (elapsed / total) * 100));
                     const remaining = Math.ceil((times.end - now.getTime()) / 60000);
-                    progressHtml = `<div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>`;
+                    // Фон карточки заполняется зелёным по мере прохождения времени
+                    bgStyle = `background: linear-gradient(to right, rgba(40,167,69,0.35) ${progress}%, #e8f4f8 ${progress}%);`;
                     timerHtml = `<span class="timer-badge">⏱ ${remaining} мин</span>`;
                 } else if (isToday && now.getTime() < times.start &&
                            (index === 0 || now.getTime() > parseTime(lessons[index-1].time).end)) {
@@ -939,14 +919,14 @@
                     timerHtml = `<span class="timer-badge" style="background: #ffc107; color: #333">⏱ через ${minutesToStart} мин</span>`;
                 } else {
                     status = '<span class="status-badge status-upcoming">Предстоит</span>';
+                    cardClass = 'upcoming';
                 }
                 
-                // В режиме преподавателя показываем группу вместо/вместе с кабинетом
                 const roomDetail = isTeacherMode && lesson.group 
                     ? `<div class="detail-item"><span class="icon">👥</span><span>Гр. ${lesson.group}</span></div>`
                     : `<div class="detail-item"><span class="icon">🚪</span><span>Каб. ${lesson.room}</span></div>`;
                 
-                html += '<div class="lesson-card ' + cardClass + '" style="border-left-color:' + lessonColor + '" onclick="openColorModal(\'' + colorKey + '\',\'' + lessonColor + '\')">' +
+                html += '<div class="lesson-card ' + cardClass + '" style="border-left-color:' + lessonColor + ';' + bgStyle + '" onclick="openColorModal(\'' + colorKey + '\',\'' + lessonColor + '\')">' +
                     '<div class="lesson-header">' +
                         '<div class="lesson-number-wrap">' +
                             '<div class="lesson-number" style="background:' + lessonColor + '">' + (index+1) + '</div>' +
@@ -957,7 +937,7 @@
                     '<div class="lesson-details">' +
                         roomDetail +
                         '<div class="detail-item"><span class="icon">' + (isTeacherMode ? '🚪' : '👨‍🏫') + '</span><span>' + (isTeacherMode ? 'Каб. ' + lesson.room : lesson.teacher) + '</span></div>' +
-                    '</div>' + status + timerHtml + progressHtml + '</div>';
+                    '</div>' + status + timerHtml + '</div>';
             });
             div.innerHTML = html;
         }
