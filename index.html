@@ -27,21 +27,26 @@
         .badge.inactive { background: #e0e0e0; color: #999; }
         .mode-indicator { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.3); font-weight: 500; }
         .current-time { color: #666; font-size: 13px; }
+        
         .stats-bar { background: rgba(255,255,255,0.95); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-around; box-shadow: 0 2px 10px rgba(0,0,0,0.08); font-size: 11px; color: #555; }
         .stat-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
         .stat-value { font-size: 16px; font-weight: 700; color: #5a7d9a; }
+        
         .days-nav { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; scroll-behavior: smooth; }
         .days-nav::-webkit-scrollbar { height: 4px; }
         .days-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 2px; }
         .day-btn { flex-shrink: 0; background: white; border: none; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; color: #555; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
         .day-btn.active { background: #5a7d9a; color: white; transform: scale(1.05); }
+        
         .schedule { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); transition: transform 0.3s; flex: 1; }
         .schedule.swiping { transition: none; }
+        
         .lesson-card { border-radius: 12px; padding: 14px; margin-bottom: 12px; border-left: 4px solid #5a7d9a; transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden; background: white; }
         .lesson-card:last-child { margin-bottom: 0; }
         .lesson-card.upcoming { background: #f8f9fa; }
         .lesson-card.next { background: linear-gradient(to right, #fff3cd 0%, #fff3cd 100%); border-left-color: #ffc107; }
         .lesson-card.current { border-left-color: #28a745; }
+        
         .lesson-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; position: relative; z-index: 2; }
         .lesson-number-wrap { display: flex; align-items: center; gap: 8px; }
         .lesson-number { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; color: white; flex-shrink: 0; }
@@ -51,14 +56,17 @@
         .lesson-details { display: flex; gap: 12px; flex-wrap: nowrap; overflow: hidden; position: relative; z-index: 2; }
         .detail-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
         .detail-item .icon { font-size: 13px; flex-shrink: 0; }
+        
         .status-badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; margin-top: 8px; position: relative; z-index: 2; }
         .status-current { background: #28a745; color: white; }
         .status-next { background: #ffc107; color: #333; }
         .status-upcoming { background: #e9ecef; color: #666; }
         .timer-badge { display: inline-block; padding: 3px 8px; background: #28a745; color: white; border-radius: 6px; font-size: 10px; font-weight: 600; margin-top: 6px; margin-left: 8px; position: relative; z-index: 2; }
+        
         .no-lessons { text-align: center; padding: 40px 20px; color: #666; }
         .no-lessons .emoji { font-size: 48px; margin-bottom: 12px; }
         .swipe-hint { text-align: center; color: rgba(255,255,255,0.7); font-size: 11px; margin-top: 12px; padding: 6px; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal.active { display: flex; }
         .modal-content { background: white; border-radius: 16px; padding: 20px; max-width: 400px; width: 100%; max-height: 80vh; overflow-y: auto; }
@@ -71,31 +79,19 @@
         .search-input { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; margin-bottom: 12px; }
         .search-input:focus { outline: none; border-color: #5a7d9a; }
         .modal-close { width: 100%; padding: 10px; background: #5a7d9a; color: white; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; }
-        .refresh-btn { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; margin-bottom: 10px; }
-        .refresh-btn:disabled { background: #999; }
-        .loading { text-align: center; padding: 20px; color: #5a7d9a; font-size: 13px; }
-        .settings-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
-        .settings-row label { font-size: 12px; color: #666; min-width: 60px; }
-        .settings-row input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 12px; }
+        .refresh-btn { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; margin-bottom: 10px; font-weight: 600; }
+        .refresh-btn:disabled { background: #999; cursor: not-allowed; }
+        .loading-text { text-align: center; padding: 20px; color: #5a7d9a; font-size: 13px; }
+        
         @media (min-width: 768px) and (orientation: portrait) {
-            body { padding: 40px; }
-            .container { max-width: 900px; }
-            .header { padding: 32px; }
-            .header h1 { font-size: 48px; }
-            .current-time { font-size: 28px; }
-            .badge { font-size: 22px; padding: 8px 18px; }
-            .stats-bar { padding: 20px; font-size: 18px; }
-            .stat-value { font-size: 28px; }
-            .day-btn { padding: 20px 32px; font-size: 24px; }
-            .schedule { padding: 32px; }
+            body { padding: 40px; } .container { max-width: 900px; } .header { padding: 32px; } .header h1 { font-size: 48px; }
+            .current-time { font-size: 28px; } .badge { font-size: 22px; padding: 8px 18px; }
+            .stats-bar { padding: 20px; font-size: 18px; } .stat-value { font-size: 28px; }
+            .day-btn { padding: 20px 32px; font-size: 24px; } .schedule { padding: 32px; }
             .lesson-card { padding: 28px; margin-bottom: 24px; border-left-width: 8px; }
-            .lesson-number { width: 56px; height: 56px; font-size: 24px; }
-            .lesson-time { font-size: 24px; }
-            .lesson-name { font-size: 32px; }
-            .lesson-icon { font-size: 36px; }
-            .detail-item { font-size: 22px; }
-            .status-badge { padding: 8px 20px; font-size: 20px; }
-            .timer-badge { padding: 6px 14px; font-size: 18px; }
+            .lesson-number { width: 56px; height: 56px; font-size: 24px; } .lesson-time { font-size: 24px; }
+            .lesson-name { font-size: 32px; } .lesson-icon { font-size: 36px; } .detail-item { font-size: 22px; }
+            .status-badge { padding: 8px 20px; font-size: 20px; } .timer-badge { padding: 6px 14px; font-size: 18px; }
             .swipe-hint { display: none; }
         }
     </style>
@@ -124,310 +120,219 @@
         <div class="swipe-hint">Свайп для смены дня 👉</div>
     </div>
     
-    <!-- Модалка выбора группы -->
     <div class="modal" id="groupModal">
         <div class="modal-content">
             <h3>Выберите группу</h3>
-            <button class="refresh-btn" id="refreshGroupBtn" onclick="refreshSchedule()">🔄 Обновить расписание с сайта</button>
-            <input type="text" class="search-input" id="groupSearch" placeholder="Поиск группы..." oninput="filterGroups()">
-            <div class="settings-row">
-                <label>URL:</label>
-                <input type="text" id="baseUrl" value="http://94.72.18.202:8083" onchange="saveBaseUrl()">
-            </div>
-            <div class="list-container" id="groupList"></div>
-            <button class="modal-close" onclick="closeGroupModal()">Закрыть</button>
+            <button class="refresh-btn" id="refreshGroupBtn" onclick="refreshData('group')">🔄 Загрузить с сайта КИТИС</button>
+            <input type="text" class="search-input" id="groupSearch" placeholder="Поиск группы..." oninput="filterList('group')">
+            <div class="list-container" id="groupList"><div class="loading-text">Загрузка...</div></div>
+            <button class="modal-close" onclick="closeModal('group')">Закрыть</button>
         </div>
     </div>
     
-    <!-- Модалка выбора преподавателя -->
     <div class="modal" id="teacherModal">
         <div class="modal-content">
             <h3>Выберите преподавателя</h3>
-            <button class="reset-btn" id="resetTeacherBtn" onclick="resetTeacher()" style="display:none;">✕ Вернуться к группе</button>
-            <button class="refresh-btn" id="refreshTeacherBtn" onclick="refreshSchedule()">🔄 Обновить расписание с сайта</button>
-            <input type="text" class="search-input" id="teacherSearch" placeholder="Поиск преподавателя..." oninput="filterTeachers()">
-            <div class="list-container" id="teacherListModal"></div>
-            <button class="modal-close" onclick="closeTeacherModal()">Закрыть</button>
+            <button class="reset-btn" id="resetTeacherBtn" onclick="resetToGroup()" style="display:none;">✕ Вернуться к группе</button>
+            <button class="refresh-btn" id="refreshTeacherBtn" onclick="refreshData('teacher')">🔄 Загрузить с сайта КИТИС</button>
+            <input type="text" class="search-input" id="teacherSearch" placeholder="Поиск преподавателя..." oninput="filterList('teacher')">
+            <div class="list-container" id="teacherList"><div class="loading-text">Загрузка...</div></div>
+            <button class="modal-close" onclick="closeModal('teacher')">Закрыть</button>
         </div>
     </div>
-    
+
+    <div class="modal" id="colorModal">
+        <div class="modal-content">
+            <h3>Цвет предмета</h3>
+            <div id="colorPicker" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;"></div>
+            <button class="modal-close" onclick="document.getElementById('colorModal').classList.remove('active')">Закрыть</button>
+        </div>
+    </div>
+
     <script>
-        // ===== РЕАЛЬНЫЕ ДАННЫЕ С САЙТА КИТИС =====
-        const groupsList = ["СОД25-1","СОД25-2К","СОД26-1","СОД26-2К","С23-1","С23-3К","С23УЗ","С24-1","С24-2","С24-3К","С24УЗ","С25-1","С25-2","С25-3","С25-УЗ","С26-1","С26-2","С26-3","С26-4","С26-УЗ","УМД25-1","УМД26-1","ИМс24-1","ИМС25-1","ИМС26-1","ИМС26-2","СА23-1","СА24-1","СА24-2","СА24УЗ","СА25-1","СА25-2","СА25-УЗ","СА26-1","СА26-2","СА26-УЗ","ИСа23-1","ИСа24-1","ИСа25-1","ИСп23-1","ИСп23-2К","ИСп24-1","ИСп24-2К","ИСп25-1","ИСр24-1","ИСр25-1","ИСс24-1","ИСс25-1","ВЕБ26-1","ВЕБ26-2","РКИ25-1","РКИ26-1","РКИ26-2","СВ25-1","СВ25-2К","СВ26-1","СВ26-2К","М25-1","М26-1","ТГ26-1К"];
-        
-        const teachersList = ["Андрийченко В.А.","Анчиков А.И.","Баденкова Ю.А.","Богачёв В.И.","Борисов А.В.","Брускина Н.И.","Волошин Р.Н.","Голованова Н.С.","Голота Ю.А.","Гребенник В.С.","Григорян Н.А.","Гришина С.В.","Громов Р.И.","Дайлида В.К.","Досаева А.А.","Дрёмов А.В.","Евстафиева Т.В.","Егорова И.И.","Ефремов И.А.","Журбицкая А.М.","Журский Р.Д.","Зуев В.М.","Иванов Д.С.","Казакова Н.Н.","Каминская Е.В.","Кибиц Д.Н.","Кирьянова Я.В.","Кислова Н.В.","Ковалёва О.Р.","Коваль Е.Н.","Кожевникова Д.О.","Коленда Е.Р.","Колошко Е.А.","Корнева М.И.","Котельников А.М.","Краснощекова В.В.","Кривуля М.А.","Кривцун А.А.","Кузнецова Т.А.","Куприянова А.П.","Лебедева А.В.","Леонова А.Е.","Линник О.В.","Максимова Н.А.","Минбулатова И.Г.","Молите Д.А.","Морылёв К.С.","Непочатых А.В.","Одегов С.Ю.","Письменчук М.А.","Плешков В.М.","Подгорных О.А.","Подтяжкин В.Д.","Позднякова Г.А.","Пронин И.А.","Разумова А.М.","Рыбачек А.А.","Савило С.Ф.","Садовская А.А.","Садыков Т.А.","Сергиеня Д.Д.","Смирнов И.А.","Спирин В.В.","Сычугова Д.Д.","Трифонова А.Ю.","Тютюнова Е.В.","Ушкина Т.А.","Федоренко М.В.","Федосов А.В.","Хмеленко В.В.","Хорунжий Д.Г.","Храмов С.С.","Чертищев В.А.","Шадрина О.А.","Шаройкина Т.Я.","Шевченко П.С.","Ширяева Н.С."];
-        
-        // Расписание звонков КИТИС
-        const bells = ['8:30-10:00','10:15-11:45','12:15-13:45','14:00-15:30','15:45-17:15','17:30-19:00'];
-        
-        // Иконки по ключевым словам предмета
-        const iconMap = [
-            { keys: ['матем','алгебр','геом','анализ'], icon: '📐' },
-            { keys: ['физ'], icon: '🔬' },
-            { keys: ['информ','вычисл','программ','бд','базы данных'], icon: '💻' },
-            { keys: ['англ','язык','немец','франц'], icon: '🌍' },
-            { keys: ['истор','краевед'], icon: '📜' },
-            { keys: ['литерат','русск'], icon: '📖' },
-            { keys: ['биолог','ботаник','зоолог','эколог'], icon: '🧬' },
-            { keys: ['химия','химии'], icon: '⚗️' },
-            { keys: ['географ','геодез','картограф'], icon: '🗺️' },
-            { keys: ['физкультур','спорт'], icon: '⚽' },
-            { keys: ['обж','безопасн'], icon: '🛡️' },
-            { keys: ['общество','прав','социол'], icon: '🏛️' },
-            { keys: ['электр','радио','схемотехн'], icon: '⚡' },
-            { keys: ['механик','деталей','черчен','материаловед'], icon: '⚙️' },
-            { keys: ['экономи','менедж','бухгалт','финанс'], icon: '💰' },
-            { keys: ['философ','психолог','педагог'], icon: '🧠' },
-            { keys: ['черчен','графика'], icon: '✏️' },
-            { keys: ['лаборат','практикум'], icon: '🧪' }
-        ];
-        
-        function getIcon(name) {
-            const lower = name.toLowerCase();
-            for (const m of iconMap) {
-                if (m.keys.some(k => lower.includes(k))) return m.icon;
-            }
-            return '📚';
+        // ===== ЯДРО ПАРСЕРА КИТИС (адаптировано из kitis-parser.js) =====
+        const ENTITIES = { nbsp: ' ', quot: '"', amp: '&', lt: '<', gt: '>', laquo: '«', raquo: '»', ndash: '–', mdash: '—' };
+        function text(html) {
+            return String(html || '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, '')
+                .replace(/&(#\d+|[a-z]+);/gi, (all, name) => name.charAt(0) === '#' ? String.fromCharCode(parseInt(name.slice(1), 10)) : (ENTITIES[name.toLowerCase()] || all))
+                .replace(/\s+/g, ' ').trim();
         }
-        
-        // ===== ХРАНИЛИЩЕ =====
-        // Расписание хранится в localStorage: { 'group_СОД25-1': { 'Понедельник': [...] }, ... }
-        // Ключи: 'group_ИМЯ' или 'teacher_ИМЯ'
-        
-        function getStorageKey() {
-            return viewMode === 'teacher' ? 'teacher_' + currentTeacher : 'group_' + currentGroup;
+        function attr(attrs, name) {
+            const m = new RegExp('\\b' + name + '\\s*=\\s*(?:"([^"]*)"|\'([^\']*)\'|([^\\s>]+))', 'i').exec(attrs || '');
+            return m ? (m[1] != null ? m[1] : m[2] != null ? m[2] : m[3]) : null;
         }
-        
-        function getLoadedSchedule() {
-            const key = getStorageKey();
-            const raw = localStorage.getItem('kitis_' + key);
-            return raw ? JSON.parse(raw) : null;
+        function anchors(html) {
+            const out = []; const re = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi; let m;
+            while ((m = re.exec(html))) out.push({ href: attr(m[1], 'href') || '', cls: attr(m[1], 'class') || '', text: text(m[2]) });
+            return out;
         }
-        
-        function saveSchedule(data) {
-            const key = getStorageKey();
-            localStorage.setItem('kitis_' + key, JSON.stringify(data));
-            localStorage.setItem('kitis_updated_' + key, new Date().toLocaleString('ru-RU'));
+        function idOf(href, prefix) {
+            const m = new RegExp('^.?/?' + prefix + '(\\d+).htm$', 'i').exec(String(href || '').trim());
+            return m ? parseInt(m[1], 10) : null;
         }
-        
-        function getBaseUrl() {
-            return localStorage.getItem('kitis_baseUrl') || 'http://94.72.18.202:8083';
+        function parseList(html, prefix) {
+            const seen = {};
+            return anchors(html).reduce((acc, a) => {
+                const id = idOf(a.href, prefix);
+                if (id != null && a.text && !seen[id]) { seen[id] = 1; acc.push({ id, name: a.text }); }
+                return acc;
+            }, []);
         }
-        
-        function saveBaseUrl() {
-            localStorage.setItem('kitis_baseUrl', document.getElementById('baseUrl').value.trim());
+        function rows(html) { return String(html).split(/<tr\b[^>]*>/i).slice(1); }
+        function cells(row) {
+            const out = []; const re = /<td\b([^>]*)>([\s\S]*?)(?=<td\b|<\/tr>|$)/gi; let m;
+            while ((m = re.exec(row))) out.push({ attrs: m[1], html: m[2].replace(/<\/td>\s*$/i, ''), cls: (attr(m[1], 'class') || '').toLowerCase() });
+            return out;
         }
-        
-        // ===== ПАРСЕР HTML РАСПИСАНИЯ =====
-        // Универсальный парсер: ищет таблицы, в них строки с временем формата HH:MM
-        function parseScheduleHTML(html) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const result = {};
-            const dayNames = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
-            const dayMap = {
-                'понедельник': 'Понедельник', 'вторник': 'Вторник', 'среда': 'Среда',
-                'четверг': 'Четверг', 'пятница': 'Пятница', 'суббота': 'Суббота',
-                'пн': 'Понедельник', 'вт': 'Вторник', 'ср': 'Среда', 'чт': 'Четверг',
-                'пт': 'Пятница', 'сб': 'Суббота'
-            };
-            
-            const tables = doc.querySelectorAll('table');
-            let currentDay = null;
-            
-            tables.forEach(table => {
-                const rows = table.querySelectorAll('tr');
-                rows.forEach(row => {
-                    const cells = Array.from(row.querySelectorAll('td, th')).map(c => c.textContent.trim());
-                    if (cells.length === 0) return;
-                    
-                    const joined = cells.join(' ').toLowerCase();
-                    
-                    // Определяем день недели (строка-заголовок)
-                    for (const [key, val] of Object.entries(dayMap)) {
-                        if (joined.includes(key) && cells.length <= 2) {
-                            currentDay = val;
-                            if (!result[val]) result[val] = [];
-                            return;
+        function parseWeek(html) {
+            const out = []; let date = null;
+            rows(html).forEach(r => {
+                const c = cells(r); let i = 0;
+                if (c[0] && /\d{2}\.\d{2}\.\d{4}/.test(text(c[0].html))) { date = text(c[0].html); i = 1; }
+                if (!date || !c[i] || c[i].cls !== 'hd') return;
+                const pair = parseInt(text(c[i].html), 10);
+                if (!pair) return;
+                let col = 0;
+                c.slice(i + 1).forEach(cell => {
+                    const span = parseInt(attr(cell.attrs, 'colspan') || '1', 10) || 1;
+                    const sub = span >= 2 ? 0 : col + 1;
+                    col += span;
+                    if (cell.cls === 'nul' || !text(cell.html)) return;
+                    let cur = null; const list = [];
+                    anchors(cell.html).forEach(a => {
+                        const j = idOf(a.href, 'j');
+                        if (j != null || /\bz1\b/.test(a.cls)) {
+                            cur = { date, pair, sub, subject: a.text, rooms: [], teachers: [], cls: cell.cls };
+                            list.push(cur);
+                        } else if (cur && (idOf(a.href, 'ca') != null || /\bz2\b/.test(a.cls))) {
+                            cur.rooms.push(a.text);
+                        } else if (cur && (idOf(a.href, 'cp') != null || /\bz3\b/.test(a.cls))) {
+                            cur.teachers.push(a.text);
                         }
-                    }
-                    
-                    // Ищем строку с временем (формат HH:MM или HH:MM-HH:MM)
-                    const timeRegex = /(\d{1,2}[:.]\d{2})\s*[-–—]\s*(\d{1,2}[:.]\d{2})/;
-                    const timeMatch = joined.match(timeRegex);
-                    
-                    if (timeMatch && currentDay) {
-                        const time = timeMatch[1].replace('.', ':') + '-' + timeMatch[2].replace('.', ':');
-                        
-                        // Извлекаем предмет, преподавателя, аудиторию из ячеек
-                        let subject = '', teacher = '', room = '';
-                        
-                        // Ячейка с предметом — самая длинная текстовая без времени
-                        const textCells = cells.filter(c => c && !timeRegex.test(c) && !/^\d+$/.test(c));
-                        if (textCells.length >= 1) subject = textCells[0];
-                        if (textCells.length >= 2) teacher = textCells[1];
-                        if (textCells.length >= 3) room = textCells[2];
-                        
-                        // Если предмет не найден — берём из joined
-                        if (!subject) {
-                            const cleaned = joined.replace(timeRegex, '').replace(/\d+/g, '').trim();
-                            subject = cleaned.substring(0, 50) || 'Занятие';
-                        }
-                        
-                        subject = subject.charAt(0).toUpperCase() + subject.slice(1);
-                        
-                        result[currentDay].push({
-                            time: time,
-                            name: subject,
-                            room: room || '—',
-                            teacher: teacher || '—',
-                            icon: getIcon(subject)
-                        });
-                    }
+                    });
+                    if (!list.length) list.push({ date, pair, sub, subject: text(cell.html), rooms: [], teachers: [], cls: cell.cls });
+                    out.push(...list);
                 });
             });
+            return out;
+        }
+
+        // ===== НАСТРОЙКИ И ДАННЫЕ =====
+        const BASE_URL = 'http://94.72.18.202:8083';
+        const PROXY = 'https://corsproxy.io/?';
+        const bells = { 1: '8:30-10:00', 2: '10:15-11:45', 3: '12:15-13:45', 4: '14:00-15:30', 5: '15:45-17:15', 6: '17:30-19:00' };
+        const iconMap = [
+            { keys: ['матем','алгебр','геом','анализ'], icon: '📐' }, { keys: ['физ'], icon: '🔬' },
+            { keys: ['информ','вычисл','программ','бд','базы'], icon: '💻' }, { keys: ['англ','язык','немец'], icon: '🌍' },
+            { keys: ['истор','краевед'], icon: '📜' }, { keys: ['литерат','русск'], icon: '📖' },
+            { keys: ['биолог','ботаник','эколог'], icon: '🧬' }, { keys: ['химия','химии'], icon: '⚗️' },
+            { keys: ['географ','геодез'], icon: '🗺️' }, { keys: ['физкультур','спорт'], icon: '⚽' },
+            { keys: ['обж','безопасн'], icon: '🛡️' }, { keys: ['общество','прав','социол'], icon: '🏛️' },
+            { keys: ['электр','радио','схемотехн'], icon: '⚡' }, { keys: ['механик','деталей','черчен'], icon: '⚙️' },
+            { keys: ['экономи','менедж','бухгалт'], icon: '💰' }, { keys: ['философ','психолог','педагог'], icon: '🧠' }
+        ];
+        function getIcon(name) {
+            const lower = name.toLowerCase();
+            for (const m of iconMap) if (m.keys.some(k => lower.includes(k))) return m.icon;
+            return '📚';
+        }
+
+        const days = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+        let groupsData = JSON.parse(localStorage.getItem('kitis_groups') || '[]');
+        let teachersData = JSON.parse(localStorage.getItem('kitis_teachers') || '[]');
+        let currentGroup = localStorage.getItem('kitis_cur_group') || (groupsData[0]?.name || '');
+        let currentTeacher = localStorage.getItem('kitis_cur_teacher') || null;
+        let viewMode = currentTeacher ? 'teacher' : 'group';
+        let currentDay = new Date().getDay(); currentDay = currentDay === 0 ? 6 : currentDay - 1;
+        let selectedLesson = null;
+        const colors = ['#A8D8EA','#AA96DA','#FCBAD3','#FFFFD2','#A8E6CF','#FFD3B6','#D4A5A5','#B5EAD7','#C7CEEA','#F8B195','#E2F0CB','#FFDAC1'];
+
+        async function fetchProxy(url) {
+            try {
+                const resp = await fetch(PROXY + encodeURIComponent(url));
+                if (!resp.ok) return null;
+                return await resp.text();
+            } catch { return null; }
+        }
+
+        async function refreshData(type) {
+            const btn = document.getElementById(type === 'group' ? 'refreshGroupBtn' : 'refreshTeacherBtn');
+            btn.disabled = true; btn.textContent = '⏳ Загрузка с сервера...';
             
-            // Сортируем пары по времени и удаляем пустые дни
-            for (const day of Object.keys(result)) {
-                if (result[day].length === 0) { delete result[day]; continue; }
-                result[day].sort((a, b) => {
-                    const ah = parseInt(a.time.split(':')[0]);
-                    const bh = parseInt(b.time.split(':')[0]);
-                    return ah - bh;
-                });
+            if (type === 'group' && groupsData.length === 0) {
+                const html = await fetchProxy(BASE_URL + '/cg.htm');
+                if (html) { groupsData = parseList(html, 'cg'); localStorage.setItem('kitis_groups', JSON.stringify(groupsData)); }
+            }
+            if (type === 'teacher' && teachersData.length === 0) {
+                const html = await fetchProxy(BASE_URL + '/cp.htm');
+                if (html) { teachersData = parseList(html, 'cp'); localStorage.setItem('kitis_teachers', JSON.stringify(teachersData)); }
             }
             
-            return Object.keys(result).length > 0 ? result : null;
+            btn.textContent = '✅ Обновлено!';
+            setTimeout(() => { btn.textContent = '🔄 Загрузить с сайта КИТИС'; btn.disabled = false; }, 1500);
+            renderList(type);
         }
-        
-        // ===== ЗАГРУЗКА С САЙТА =====
-        async function fetchSchedule(name, type) {
-            const base = getBaseUrl();
-            // Пробуем несколько типовых путей для УРП
-            const paths = type === 'group' 
-                ? [`/rasp/gruppa/${name}.htm`, `/rasp/1/${name}.htm`, `/week/${name}.htm`, `/rasp/${name}.htm`, `/gr/${name}.htm`]
-                : [`/rasp/prepod/${name}.htm`, `/rasp/2/${name}.htm`, `/week/${name}.htm`, `/rasp/${name}.htm`, `/pr/${name}.htm`];
-            
-            const proxies = [
-                url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
-                url => 'https://corsproxy.io/?' + encodeURIComponent(url),
-                url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url)
-            ];
-            
-            for (const path of paths) {
-                const fullUrl = base + path;
-                for (const makeProxy of proxies) {
-                    try {
-                        const resp = await fetch(makeProxy(fullUrl));
-                        if (!resp.ok) continue;
-                        const html = await resp.text();
-                        if (!html || html.includes('Not Found') || html.length < 500) continue;
-                        const parsed = parseScheduleHTML(html);
-                        if (parsed) return { data: parsed, url: fullUrl };
-                    } catch (e) { /* пробуем следующий */ }
-                }
+
+        function transformSchedule(parsedWeek) {
+            const result = {};
+            const dayNames = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+            parsedWeek.forEach(lesson => {
+                const parts = lesson.date.split('.');
+                const d = new Date(parts[2], parts[1] - 1, parts[0]);
+                const dayName = dayNames[d.getDay()];
+                if (!result[dayName]) result[dayName] = [];
+                result[dayName].push({
+                    time: bells[lesson.pair] || `${lesson.pair} пара`,
+                    pairNum: lesson.pair,
+                    name: lesson.subject,
+                    room: lesson.rooms.join(', ') || '—',
+                    teacher: lesson.teachers.join(', ') || '—',
+                    icon: getIcon(lesson.subject)
+                });
+            });
+            for (const day in result) result[day].sort((a, b) => a.pairNum - b.pairNum);
+            return result;
+        }
+
+        function getCurrentSchedule() {
+            const key = viewMode === 'teacher' ? `kitis_sched_T_${currentTeacher}` : `kitis_sched_G_${currentGroup}`;
+            const cached = localStorage.getItem(key);
+            if (cached) return JSON.parse(cached);
+            return {}; // Пусто, если ещё не загружено
+        }
+
+        async function loadScheduleForItem(item, type) {
+            const prefix = type === 'group' ? 'cg' : 'cp';
+            const html = await fetchProxy(`${BASE_URL}/${prefix}${item.id}.htm`);
+            if (html) {
+                const parsed = transformSchedule(parseWeek(html));
+                const key = type === 'group' ? `kitis_sched_G_${item.name}` : `kitis_sched_T_${item.name}`;
+                localStorage.setItem(key, JSON.stringify(parsed));
+                localStorage.setItem(key + '_time', new Date().toLocaleString('ru-RU'));
+                return parsed;
             }
             return null;
         }
-        
-        async function refreshSchedule() {
-            const btn = viewMode === 'teacher' 
-                ? document.getElementById('refreshTeacherBtn') 
-                : document.getElementById('refreshGroupBtn');
-            const name = viewMode === 'teacher' ? currentTeacher : currentGroup;
-            if (!name) return;
-            
-            btn.disabled = true;
-            btn.textContent = '⏳ Загрузка...';
-            
-            const result = await fetchSchedule(name, viewMode);
-            
-            if (result) {
-                saveSchedule(result.data);
-                btn.textContent = '✅ Обновлено!';
-                renderSchedule();
-                updateStats();
-            } else {
-                btn.textContent = '❌ Не удалось загрузить';
-                setTimeout(() => { btn.textContent = '🔄 Обновить расписание с сайта'; }, 3000);
-                btn.disabled = false;
-                return;
-            }
-            
-            setTimeout(() => { 
-                btn.textContent = '🔄 Обновить расписание с сайта'; 
-                btn.disabled = false; 
-            }, 2000);
-        }
-        
-        // ===== СОСТОЯНИЕ =====
-        const days = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
-        let currentGroup = localStorage.getItem('kitis_group') || groupsList[0];
-        let currentTeacher = localStorage.getItem('kitis_teacher') || null;
-        let viewMode = currentTeacher ? 'teacher' : 'group';
-        let currentDay = new Date().getDay();
-        currentDay = currentDay === 0 ? 6 : currentDay - 1;
-        let selectedLesson = null;
-        const colors = ['#A8D8EA','#AA96DA','#FCBAD3','#FFFFD2','#A8E6CF','#FFD3B6','#D4A5A5','#B5EAD7','#C7CEEA','#F8B195','#E2F0CB','#FFDAC1'];
-        
-        function loadColors() { 
-            const key = viewMode === 'teacher' ? 'kitis_colors_T_' + currentTeacher : 'kitis_colors_' + currentGroup;
-            const s = localStorage.getItem(key); 
-            return s ? JSON.parse(s) : {}; 
-        }
-        function saveColors(c) { 
-            const key = viewMode === 'teacher' ? 'kitis_colors_T_' + currentTeacher : 'kitis_colors_' + currentGroup;
-            localStorage.setItem(key, JSON.stringify(c)); 
-        }
-        
-        function parseTime(t) {
-            const [s,e] = t.split('-');
-            const [sh,sm] = s.split(':').map(Number);
-            const [eh,em] = e.split(':').map(Number);
-            return { start: new Date().setHours(sh,sm,0,0), end: new Date().setHours(eh,em,0,0) };
-        }
-        
+
+        // ===== UI ФУНКЦИИ =====
         function updateCurrentTime() {
             const n = new Date();
-            document.getElementById('currentTime').textContent =
-                n.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}) + ', ' +
-                n.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+            document.getElementById('currentTime').textContent = n.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}) + ', ' + n.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
         }
-        
+
         function updateBadges() {
-            const gb = document.getElementById('groupBadge');
-            const tb = document.getElementById('teacherBadge');
+            const gb = document.getElementById('groupBadge'), tb = document.getElementById('teacherBadge');
             if (viewMode === 'teacher') {
-                gb.classList.add('inactive');
-                gb.textContent = '👥 ' + currentGroup;
-                tb.classList.remove('inactive');
-                tb.innerHTML = '👨‍🏫 ' + currentTeacher + ' <span class="mode-indicator">активно</span>';
+                gb.classList.add('inactive'); gb.textContent = '👥 ' + currentGroup;
+                tb.classList.remove('inactive'); tb.innerHTML = '👨‍🏫 ' + currentTeacher + ' <span class="mode-indicator">активно</span>';
             } else {
-                gb.classList.remove('inactive');
-                gb.textContent = '👥 ' + currentGroup;
-                tb.classList.add('inactive');
-                tb.textContent = '👨‍🏫 Преподаватель';
+                gb.classList.remove('inactive'); gb.textContent = '👥 ' + currentGroup;
+                tb.classList.add('inactive'); tb.textContent = '👨‍🏫 Преподаватель';
             }
         }
-        
-        function getCurrentData() {
-            const loaded = getLoadedSchedule();
-            if (loaded) return loaded;
-            // Демо-расписание если ничего не загружено
-            return {
-                'Понедельник': [
-                    { time: bells[0], name: 'Математика', room: '120', teacher: 'Иванов Д.С.', icon: '📐' },
-                    { time: bells[1], name: 'Физика', room: '205', teacher: 'Петров А.В.', icon: '🔬' }
-                ],
-                'Вторник': [
-                    { time: bells[0], name: 'Информатика', room: '310', teacher: 'Сидоров С.С.', icon: '💻' }
-                ]
-            };
-        }
-        
+
         function updateStats() {
-            const dayName = days[currentDay];
-            const lessons = getCurrentData()[dayName] || [];
+            const lessons = getCurrentSchedule()[days[currentDay]] || [];
             document.getElementById('totalLessons').textContent = lessons.length;
             if (lessons.length > 0) {
                 document.getElementById('firstLesson').textContent = lessons[0].time.split('-')[0];
@@ -437,7 +342,7 @@
                 document.getElementById('lastLesson').textContent = '-';
             }
         }
-        
+
         function renderDaysNav() {
             const nav = document.getElementById('daysNav');
             nav.innerHTML = '';
@@ -448,207 +353,167 @@
                 b.onclick = () => { currentDay = i; renderDaysNav(); renderSchedule(); };
                 nav.appendChild(b);
             });
-            setTimeout(() => {
-                const a = nav.querySelector('.day-btn.active');
-                if (a) a.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-            }, 50);
+            setTimeout(() => { const a = nav.querySelector('.day-btn.active'); if (a) a.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); }, 50);
         }
-        
+
         function renderSchedule() {
             const div = document.getElementById('schedule');
             const dayName = days[currentDay];
-            const lessons = getCurrentData()[dayName] || [];
-            const lc = loadColors();
+            const schedule = getCurrentSchedule();
+            const lessons = schedule[dayName] || [];
+            const updated = localStorage.getItem((viewMode === 'teacher' ? `kitis_sched_T_${currentTeacher}` : `kitis_sched_G_${currentGroup}`) + '_time');
             
-            const updated = localStorage.getItem('kitis_updated_' + getStorageKey());
-            const isDemo = !getLoadedSchedule();
-            
-            if (lessons.length === 0) {
-                div.innerHTML = `<div class="no-lessons"><div class="emoji">🎉</div><div>Нет пар${isDemo ? '<br><small style="color:#999;font-size:10px;">Нажми на бейдж → «Обновить»</small>' : ''}</div></div>`;
+            if (lessons.length === 0 && Object.keys(schedule).length === 0) {
+                div.innerHTML = `<div class="no-lessons"><div class="emoji">📥</div><div>Нет данных<br><small style="color:#999;font-size:11px;">Нажмите на бейдж выше → «Загрузить с сайта КИТИС»</small></div></div>`;
                 return;
             }
-            
+            if (lessons.length === 0) {
+                div.innerHTML = `<div class="no-lessons"><div class="emoji">🎉</div><div>Нет пар</div>${updated ? `<div style="font-size:10px;color:#999;margin-top:8px;">Обновлено: ${updated}</div>` : ''}</div>`;
+                return;
+            }
+
             const now = new Date();
             const todayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
             const isToday = currentDay === todayIndex;
             const isTeacherMode = viewMode === 'teacher';
-            let html = '';
-            
-            if (isDemo) {
-                html += '<div style="background:#fff3cd;padding:8px 12px;border-radius:8px;font-size:11px;color:#856404;margin-bottom:12px;">⚠️ Демо-данные. Нажми «Обновить расписание с сайта» в меню выбора</div>';
-            } else if (updated) {
-                html += `<div style="background:#e8f4f8;padding:6px 12px;border-radius:8px;font-size:10px;color:#5a7d9a;margin-bottom:12px;">🔄 Обновлено: ${updated}</div>`;
-            }
-            
+            let html = updated ? `<div style="background:#e8f4f8;padding:6px 12px;border-radius:8px;font-size:10px;color:#5a7d9a;margin-bottom:12px;">🔄 Обновлено: ${updated}</div>` : '';
+
             lessons.forEach((lesson, index) => {
-                const times = parseTime(lesson.time);
+                const [sh, sm] = lesson.time.split('-')[0].split(':').map(Number);
+                const [eh, em] = lesson.time.split('-')[1].split(':').map(Number);
+                const start = new Date().setHours(sh, sm, 0, 0);
+                const end = new Date().setHours(eh, em, 0, 0);
+                
                 let status = '', cardClass = '', timerHtml = '', bgStyle = '';
                 const colorKey = dayName + '-' + lesson.name;
+                const cKey = viewMode === 'teacher' ? 'kitis_colors_T_' + currentTeacher : 'kitis_colors_' + currentGroup;
+                const lc = JSON.parse(localStorage.getItem(cKey) || '{}');
                 const lessonColor = lc[colorKey] || '#5a7d9a';
-                
-                if (isToday && now.getTime() >= times.start && now.getTime() <= times.end) {
+
+                if (isToday && now.getTime() >= start && now.getTime() <= end) {
                     status = '<span class="status-badge status-current">Сейчас</span>';
                     cardClass = 'current';
-                    const total = times.end - times.start;
-                    const elapsed = now.getTime() - times.start;
-                    const progress = Math.min(100, Math.max(0, (elapsed / total) * 100));
-                    const remaining = Math.ceil((times.end - now.getTime()) / 60000);
+                    const progress = Math.min(100, Math.max(0, ((now.getTime() - start) / (end - start)) * 100));
+                    const remaining = Math.ceil((end - now.getTime()) / 60000);
                     bgStyle = `background: linear-gradient(to right, rgba(40,167,69,0.55) ${progress}%, white ${progress}%);`;
                     timerHtml = `<span class="timer-badge">⏱ ${remaining} мин</span>`;
-                } else if (isToday && now.getTime() < times.start && (index === 0 || now.getTime() > parseTime(lessons[index-1].time).end)) {
+                } else if (isToday && now.getTime() < start && (index === 0 || now.getTime() > new Date().setHours(...lessons[index-1].time.split('-')[1].split(':').map(Number), 0, 0))) {
                     status = '<span class="status-badge status-next">Следующая</span>';
                     cardClass = 'next';
-                    const mins = Math.ceil((times.start - now.getTime()) / 60000);
+                    const mins = Math.ceil((start - now.getTime()) / 60000);
                     timerHtml = `<span class="timer-badge" style="background:#ffc107;color:#333">⏱ через ${mins} мин</span>`;
                 } else {
                     status = '<span class="status-badge status-upcoming">Предстоит</span>';
                     cardClass = 'upcoming';
                 }
-                
-                const firstDetail = isTeacherMode
-                    ? `<div class="detail-item"><span class="icon">👥</span><span>${lesson.group || 'Группы'}</span></div>`
-                    : `<div class="detail-item"><span class="icon">🚪</span><span>Каб. ${lesson.room}</span></div>`;
-                const secondDetail = isTeacherMode
-                    ? `<div class="detail-item"><span class="icon">🚪</span><span>Каб. ${lesson.room}</span></div>`
-                    : `<div class="detail-item"><span class="icon">👨‍🏫</span><span>${lesson.teacher}</span></div>`;
-                
-                html += '<div class="lesson-card ' + cardClass + '" style="border-left-color:' + lessonColor + ';' + bgStyle + '" onclick="openColorModal(\'' + colorKey + '\',\'' + lessonColor + '\')">' +
-                    '<div class="lesson-header"><div class="lesson-number-wrap"><div class="lesson-number" style="background:' + lessonColor + '">' + (index+1) + '</div><span class="lesson-time">' + lesson.time + '</span></div></div>' +
-                    '<div class="lesson-name"><span class="lesson-icon">' + (lesson.icon || '📚') + '</span>' + lesson.name + '</div>' +
-                    '<div class="lesson-details">' + firstDetail + secondDetail + '</div>' + status + timerHtml + '</div>';
+
+                const firstDetail = isTeacherMode ? `<div class="detail-item"><span class="icon">👥</span><span>Группы</span></div>` : `<div class="detail-item"><span class="icon">🚪</span><span>Каб. ${lesson.room}</span></div>`;
+                const secondDetail = isTeacherMode ? `<div class="detail-item"><span class="icon">🚪</span><span>Каб. ${lesson.room}</span></div>` : `<div class="detail-item"><span class="icon">👨‍🏫</span><span>${lesson.teacher}</span></div>`;
+
+                html += `<div class="lesson-card ${cardClass}" style="border-left-color:${lessonColor};${bgStyle}" onclick="openColorModal('${colorKey}','${lessonColor}')">
+                    <div class="lesson-header"><div class="lesson-number-wrap"><div class="lesson-number" style="background:${lessonColor}">${index+1}</div><span class="lesson-time">${lesson.time}</span></div></div>
+                    <div class="lesson-name"><span class="lesson-icon">${lesson.icon}</span>${lesson.name}</div>
+                    <div class="lesson-details">${firstDetail}${secondDetail}</div>${status}${timerHtml}</div>`;
             });
             div.innerHTML = html;
         }
-        
-        // ===== МОДАЛКИ =====
-        function openGroupModal(event) {
-            event.stopPropagation();
-            document.getElementById('baseUrl').value = getBaseUrl();
-            filterGroups();
-            document.getElementById('groupModal').classList.add('active');
-        }
-        function filterGroups() {
-            const q = document.getElementById('groupSearch').value.toLowerCase();
-            const list = document.getElementById('groupList');
-            list.innerHTML = groupsList.filter(g => g.toLowerCase().includes(q)).map(g =>
-                `<div class="list-item ${g === currentGroup && viewMode === 'group' ? 'active' : ''}" onclick="selectGroup('${g}')">${g}</div>`
+
+        // ===== МОДАЛЬНЫЕ ОКНА =====
+        function renderList(type) {
+            const data = type === 'group' ? groupsData : teachersData;
+            const list = document.getElementById(type + 'List');
+            const q = document.getElementById(type + 'Search').value.toLowerCase();
+            const current = type === 'group' ? currentGroup : currentTeacher;
+            
+            if (data.length === 0) {
+                list.innerHTML = '<div class="loading-text">Нажмите «Загрузить с сайта КИТИС»</div>';
+                return;
+            }
+            
+            list.innerHTML = data.filter(item => item.name.toLowerCase().includes(q)).map(item => 
+                `<div class="list-item ${item.name === current && viewMode === type ? 'active' : ''}" onclick="selectItem('${type}', '${item.name}', ${item.id})">${item.name}</div>`
             ).join('');
         }
-        function selectGroup(group) {
-            currentGroup = group;
-            viewMode = 'group';
-            currentTeacher = null;
-            localStorage.setItem('kitis_group', group);
-            localStorage.removeItem('kitis_teacher');
+
+        function filterList(type) { renderList(type); }
+
+        async function selectItem(type, name, id) {
+            if (type === 'group') {
+                currentGroup = name; viewMode = 'group'; currentTeacher = null;
+                localStorage.setItem('kitis_cur_group', name); localStorage.removeItem('kitis_cur_teacher');
+            } else {
+                currentTeacher = name; viewMode = 'teacher';
+                localStorage.setItem('kitis_cur_teacher', name);
+            }
             updateBadges();
-            closeGroupModal();
+            closeModal(type);
+            
+            // Проверяем, есть ли уже расписание, если нет - загружаем
+            const sched = getCurrentSchedule();
+            if (Object.keys(sched).length === 0) {
+                document.getElementById('schedule').innerHTML = '<div class="loading-text">Загрузка расписания...</div>';
+                const item = { name, id };
+                await loadScheduleForItem(item, type);
+            }
             renderSchedule();
             updateStats();
         }
-        function closeGroupModal() { document.getElementById('groupModal').classList.remove('active'); }
-        
-        function openTeacherModal(event) {
-            event.stopPropagation();
-            document.getElementById('resetTeacherBtn').style.display = viewMode === 'teacher' ? 'block' : 'none';
-            filterTeachers();
-            document.getElementById('teacherModal').classList.add('active');
+
+        function resetToGroup() {
+            currentTeacher = null; viewMode = 'group';
+            localStorage.removeItem('kitis_cur_teacher');
+            updateBadges(); closeModal('teacher');
+            renderSchedule(); updateStats();
         }
-        function filterTeachers() {
-            const q = document.getElementById('teacherSearch').value.toLowerCase();
-            const list = document.getElementById('teacherListModal');
-            list.innerHTML = teachersList.filter(t => t.toLowerCase().includes(q)).map(t =>
-                `<div class="list-item ${t === currentTeacher && viewMode === 'teacher' ? 'active' : ''}" onclick="selectTeacher('${t}')">${t}</div>`
-            ).join('');
-        }
-        function selectTeacher(teacher) {
-            currentTeacher = teacher;
-            viewMode = 'teacher';
-            localStorage.setItem('kitis_teacher', teacher);
-            updateBadges();
-            closeTeacherModal();
-            renderSchedule();
-            updateStats();
-        }
-        function resetTeacher() {
-            currentTeacher = null;
-            viewMode = 'group';
-            localStorage.removeItem('kitis_teacher');
-            updateBadges();
-            closeTeacherModal();
-            renderSchedule();
-            updateStats();
-        }
-        function closeTeacherModal() { document.getElementById('teacherModal').classList.remove('active'); }
-        
+
+        function openGroupModal(e) { e.stopPropagation(); renderList('group'); document.getElementById('groupModal').classList.add('active'); }
+        function openTeacherModal(e) { e.stopPropagation(); document.getElementById('resetTeacherBtn').style.display = viewMode === 'teacher' ? 'block' : 'none'; renderList('teacher'); document.getElementById('teacherModal').classList.add('active'); }
+        function closeModal(type) { document.getElementById(type + 'Modal').classList.remove('active'); }
+
         function openColorModal(key, color) {
             selectedLesson = key;
-            const picker = document.getElementById('colorPicker') || createColorModal();
+            const picker = document.getElementById('colorPicker');
             picker.innerHTML = '';
             colors.forEach(c => {
                 const o = document.createElement('div');
-                o.className = 'color-option' + (c === color ? ' selected' : '');
-                o.style.cssText = 'width:44px;height:44px;border-radius:50%;cursor:pointer;border:3px solid white;box-shadow:0 3px 8px rgba(0,0,0,0.2);background:' + c;
-                o.onclick = () => selectColor(c);
+                o.style.cssText = `width:44px;height:44px;border-radius:50%;cursor:pointer;border:3px solid ${c === color ? '#333' : 'white'};box-shadow:0 3px 8px rgba(0,0,0,0.2);background:${c};transform:${c === color ? 'scale(1.1)' : 'scale(1)'}`;
+                o.onclick = () => {
+                    const cKey = viewMode === 'teacher' ? 'kitis_colors_T_' + currentTeacher : 'kitis_colors_' + currentGroup;
+                    const lc = JSON.parse(localStorage.getItem(cKey) || '{}');
+                    lc[key] = c;
+                    localStorage.setItem(cKey, JSON.stringify(lc));
+                    document.getElementById('colorModal').classList.remove('active');
+                    renderSchedule();
+                };
                 picker.appendChild(o);
             });
             document.getElementById('colorModal').classList.add('active');
         }
-        function createColorModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.id = 'colorModal';
-            modal.innerHTML = '<div class="modal-content"><h3>Цвет предмета</h3><div class="color-picker" id="colorPicker" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;"></div><button class="modal-close" onclick="document.getElementById(\'colorModal\').classList.remove(\'active\')">Закрыть</button></div>';
-            document.body.appendChild(modal);
-            modal.addEventListener('click', e => { if (e.target.id === 'colorModal') modal.classList.remove('active'); });
-            return document.getElementById('colorPicker');
-        }
-        function selectColor(color) {
-            const lc = loadColors();
-            lc[selectedLesson] = color;
-            saveColors(lc);
-            document.getElementById('colorModal').classList.remove('active');
-            renderSchedule();
-        }
-        
+
         // ===== СВАЙП =====
         let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
         function handleSwipe() {
-            const diffX = touchStartX - touchEndX;
-            const diffY = touchStartY - touchEndY;
+            const diffX = touchStartX - touchEndX, diffY = touchStartY - touchEndY;
             if (Math.abs(diffX) < 50 || Math.abs(diffX) < Math.abs(diffY)) return;
             if (diffX > 0 && currentDay < days.length - 1) currentDay++;
             else if (diffX < 0 && currentDay > 0) currentDay--;
             else return;
             const el = document.getElementById('schedule');
-            el.classList.add('swiping');
-            el.style.transform = diffX > 0 ? 'translateX(-15px)' : 'translateX(15px)';
+            el.classList.add('swiping'); el.style.transform = diffX > 0 ? 'translateX(-15px)' : 'translateX(15px)';
             setTimeout(() => { el.style.transform = 'translateX(0)'; el.classList.remove('swiping'); }, 50);
-            renderDaysNav();
-            renderSchedule();
-            updateStats();
+            renderDaysNav(); renderSchedule(); updateStats();
         }
         document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }, { passive: true });
         document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY; handleSwipe(); }, { passive: true });
-        
-        // ===== АВТОПЕРЕКЛЮЧЕНИЕ ДЛЯ БОЛЬШОГО ЭКРАНА =====
-        let autoSwitchInterval = null;
-        function startAutoSwitch() {
-            if (window.innerWidth >= 768 && window.innerHeight > window.innerWidth) {
-                autoSwitchInterval = setInterval(() => {
-                    currentDay = (currentDay + 1) % days.length;
-                    renderDaysNav(); renderSchedule(); updateStats();
-                }, 10000);
-            }
-        }
-        
+
         // ===== СТАРТ =====
-        updateCurrentTime();
-        updateBadges();
-        renderDaysNav();
-        renderSchedule();
-        updateStats();
-        startAutoSwitch();
+        updateCurrentTime(); updateBadges(); renderDaysNav(); renderSchedule(); updateStats();
         setInterval(() => { updateCurrentTime(); renderSchedule(); }, 60000);
+        
+        // Автозагрузка при первом открытии, если есть кэш
+        if (groupsData.length > 0 && viewMode === 'group') {
+            // Данные уже в localStorage, просто показываем
+        }
     </script>
 </body>
 </html>
