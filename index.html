@@ -195,23 +195,22 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            background: white;
         }
         .lesson-card:last-child { margin-bottom: 0; }
         
-        /* Обычные карточки */
         .lesson-card.upcoming {
             background: #f8f9fa;
         }
         
-        /* Следующая пара — жёлтый фон */
         .lesson-card.next {
             background: linear-gradient(to right, #fff3cd 0%, #fff3cd 100%);
             border-left-color: #ffc107;
         }
         
-        /* Текущая пара — фон заполняется зелёным по мере прохождения времени */
         .lesson-card.current {
             border-left-color: #28a745;
+            /* Базовый фон белый, заполнение зелёным идёт через inline style */
         }
         
         .lesson-header {
@@ -506,18 +505,9 @@
         </div>
         
         <div class="stats-bar" id="statsBar">
-            <div class="stat-item">
-                <span>Пар сегодня</span>
-                <span class="stat-value" id="totalLessons">0</span>
-            </div>
-            <div class="stat-item">
-                <span>Начало</span>
-                <span class="stat-value" id="firstLesson">-</span>
-            </div>
-            <div class="stat-item">
-                <span>Конец</span>
-                <span class="stat-value" id="lastLesson">-</span>
-            </div>
+            <div class="stat-item"><span>Пар сегодня</span><span class="stat-value" id="totalLessons">0</span></div>
+            <div class="stat-item"><span>Начало</span><span class="stat-value" id="firstLesson">-</span></div>
+            <div class="stat-item"><span>Конец</span><span class="stat-value" id="lastLesson">-</span></div>
         </div>
         
         <div class="announcements" id="announcements">
@@ -667,16 +657,9 @@
             const groupSchedule = scheduleByGroup[groupId];
             Object.keys(groupSchedule).forEach(day => {
                 groupSchedule[day].forEach(lesson => {
-                    if (!teacherSchedule[lesson.teacher]) {
-                        teacherSchedule[lesson.teacher] = {};
-                    }
-                    if (!teacherSchedule[lesson.teacher][day]) {
-                        teacherSchedule[lesson.teacher][day] = [];
-                    }
-                    teacherSchedule[lesson.teacher][day].push({
-                        ...lesson,
-                        group: groupId
-                    });
+                    if (!teacherSchedule[lesson.teacher]) teacherSchedule[lesson.teacher] = {};
+                    if (!teacherSchedule[lesson.teacher][day]) teacherSchedule[lesson.teacher][day] = [];
+                    teacherSchedule[lesson.teacher][day].push({ ...lesson, group: groupId });
                 });
             });
         });
@@ -701,12 +684,9 @@
         let viewMode = currentTeacher ? 'teacher' : 'group';
 
         function getViewSchedule() {
-            if (viewMode === 'teacher' && currentTeacher) {
-                return teacherSchedule[currentTeacher] || {};
-            }
+            if (viewMode === 'teacher' && currentTeacher) return teacherSchedule[currentTeacher] || {};
             return scheduleByGroup[currentGroup] || {};
         }
-        
         function loadColors() { 
             const key = viewMode === 'teacher' ? 'lessonColors_T_' + currentTeacher : 'lessonColors_' + currentGroup;
             const s = localStorage.getItem(key); 
@@ -731,7 +711,6 @@
         function updateBadges() {
             const groupBadge = document.getElementById('groupBadge');
             const teacherBadge = document.getElementById('teacherBadge');
-            
             if (viewMode === 'teacher') {
                 groupBadge.classList.add('inactive');
                 groupBadge.textContent = '👥 Группа ' + currentGroup;
@@ -774,26 +753,16 @@
             const uniqueTeachers = [];
             const seen = new Set();
             lessons.forEach(l => {
-                if (!seen.has(l.teacher)) {
-                    seen.add(l.teacher);
-                    uniqueTeachers.push(l);
-                }
+                if (!seen.has(l.teacher)) { seen.add(l.teacher); uniqueTeachers.push(l); }
             });
             list.innerHTML = uniqueTeachers.map(l => 
-                `<div class="teacher-item">
-                    <div>
-                        <div class="teacher-name">${l.icon} ${l.teacher}</div>
-                        <div class="teacher-subject">${l.name}${l.group ? ' • Группа ' + l.group : ''}</div>
-                    </div>
-                </div>`
+                `<div class="teacher-item"><div><div class="teacher-name">${l.icon} ${l.teacher}</div><div class="teacher-subject">${l.name}${l.group ? ' • Группа ' + l.group : ''}</div></div></div>`
             ).join('');
         }
         function toggleInfoPanel(event) {
             const header = document.getElementById('header');
             header.classList.toggle('open');
-            if (header.classList.contains('open')) {
-                renderTeacherList();
-            }
+            if (header.classList.contains('open')) renderTeacherList();
         }
         
         function openGroupModal(event) {
@@ -801,10 +770,7 @@
             const modal = document.getElementById('groupModal');
             const groupList = document.getElementById('groupList');
             groupList.innerHTML = groups.map(g => 
-                `<div class="list-item ${g === currentGroup && viewMode === 'group' ? 'active' : ''}" onclick="selectGroup('${g}')">
-                    Группа ${g}
-                    <div class="subtitle">${scheduleByGroup[g]['Понедельник']?.length || 0} пар в понедельник</div>
-                </div>`
+                `<div class="list-item ${g === currentGroup && viewMode === 'group' ? 'active' : ''}" onclick="selectGroup('${g}')">Группа ${g}<div class="subtitle">${scheduleByGroup[g]['Понедельник']?.length || 0} пар в понедельник</div></div>`
             ).join('');
             modal.classList.add('active');
         }
@@ -820,24 +786,17 @@
             updateStats();
             renderTeacherList();
         }
-        function closeGroupModal() {
-            document.getElementById('groupModal').classList.remove('active');
-        }
+        function closeGroupModal() { document.getElementById('groupModal').classList.remove('active'); }
         
         function openTeacherModal(event) {
             event.stopPropagation();
             const modal = document.getElementById('teacherModal');
             const teacherList = document.getElementById('teacherListModal');
             const resetBtn = document.getElementById('resetTeacherBtn');
-            
             resetBtn.style.display = viewMode === 'teacher' ? 'block' : 'none';
-            
             teacherList.innerHTML = teachers.map(t => {
                 const totalLessons = Object.values(teacherSchedule[t]).reduce((sum, dayLessons) => sum + dayLessons.length, 0);
-                return `<div class="list-item ${t === currentTeacher && viewMode === 'teacher' ? 'active' : ''}" onclick="selectTeacher('${t}')">
-                    ${t}
-                    <div class="subtitle">${totalLessons} пар в неделю</div>
-                </div>`;
+                return `<div class="list-item ${t === currentTeacher && viewMode === 'teacher' ? 'active' : ''}" onclick="selectTeacher('${t}')">${t}<div class="subtitle">${totalLessons} пар в неделю</div></div>`;
             }).join('');
             modal.classList.add('active');
         }
@@ -861,9 +820,7 @@
             updateStats();
             renderTeacherList();
         }
-        function closeTeacherModal() {
-            document.getElementById('teacherModal').classList.remove('active');
-        }
+        function closeTeacherModal() { document.getElementById('teacherModal').classList.remove('active'); }
         
         function renderDaysNav() {
             const nav = document.getElementById('daysNav');
@@ -908,8 +865,8 @@
                     const elapsed = now.getTime() - times.start;
                     const progress = Math.min(100, Math.max(0, (elapsed / total) * 100));
                     const remaining = Math.ceil((times.end - now.getTime()) / 60000);
-                    // Фон карточки заполняется зелёным по мере прохождения времени
-                    bgStyle = `background: linear-gradient(to right, rgba(40,167,69,0.35) ${progress}%, #e8f4f8 ${progress}%);`;
+                    // Белый фон + яркий зелёный заполнитель
+                    bgStyle = `background: linear-gradient(to right, rgba(40,167,69,0.55) ${progress}%, white ${progress}%);`;
                     timerHtml = `<span class="timer-badge">⏱ ${remaining} мин</span>`;
                 } else if (isToday && now.getTime() < times.start &&
                            (index === 0 || now.getTime() > parseTime(lessons[index-1].time).end)) {
@@ -927,15 +884,9 @@
                     : `<div class="detail-item"><span class="icon">🚪</span><span>Каб. ${lesson.room}</span></div>`;
                 
                 html += '<div class="lesson-card ' + cardClass + '" style="border-left-color:' + lessonColor + ';' + bgStyle + '" onclick="openColorModal(\'' + colorKey + '\',\'' + lessonColor + '\')">' +
-                    '<div class="lesson-header">' +
-                        '<div class="lesson-number-wrap">' +
-                            '<div class="lesson-number" style="background:' + lessonColor + '">' + (index+1) + '</div>' +
-                            '<span class="lesson-time">' + lesson.time + '</span>' +
-                        '</div>' +
-                    '</div>' +
+                    '<div class="lesson-header"><div class="lesson-number-wrap"><div class="lesson-number" style="background:' + lessonColor + '">' + (index+1) + '</div><span class="lesson-time">' + lesson.time + '</span></div></div>' +
                     '<div class="lesson-name"><span class="lesson-icon">' + icon + '</span>' + lesson.name + '</div>' +
-                    '<div class="lesson-details">' +
-                        roomDetail +
+                    '<div class="lesson-details">' + roomDetail +
                         '<div class="detail-item"><span class="icon">' + (isTeacherMode ? '🚪' : '👨‍🏫') + '</span><span>' + (isTeacherMode ? 'Каб. ' + lesson.room : lesson.teacher) + '</span></div>' +
                     '</div>' + status + timerHtml + '</div>';
             });
@@ -966,57 +917,28 @@
             selectedLesson = null;
         }
 
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-
+        let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
         function handleSwipe() {
             const diffX = touchStartX - touchEndX;
             const diffY = touchStartY - touchEndY;
             const threshold = 50;
             if (Math.abs(diffX) < threshold || Math.abs(diffX) < Math.abs(diffY)) return;
-            if (diffX > 0 && currentDay < days.length - 1) {
-                currentDay++;
-            } else if (diffX < 0 && currentDay > 0) {
-                currentDay--;
-            } else {
-                return;
-            }
+            if (diffX > 0 && currentDay < days.length - 1) currentDay++;
+            else if (diffX < 0 && currentDay > 0) currentDay--;
+            else return;
             const scheduleEl = document.getElementById('schedule');
             scheduleEl.classList.add('swiping');
             scheduleEl.style.transform = diffX > 0 ? 'translateX(-15px)' : 'translateX(15px)';
-            setTimeout(() => {
-                scheduleEl.style.transform = 'translateX(0)';
-                scheduleEl.classList.remove('swiping');
-            }, 50);
+            setTimeout(() => { scheduleEl.style.transform = 'translateX(0)'; scheduleEl.classList.remove('swiping'); }, 50);
             renderDaysNav();
             renderSchedule();
             updateStats();
         }
-
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, { passive: true });
-        document.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
-            handleSwipe();
-        }, { passive: true });
-
-        let mouseDown = false;
-        let mouseStartY = 0;
+        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }, { passive: true });
+        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY; handleSwipe(); }, { passive: true });
+        let mouseDown = false, mouseStartY = 0;
         document.addEventListener('mousedown', e => { mouseDown = true; touchStartX = e.screenX; mouseStartY = e.screenY; });
-        document.addEventListener('mouseup', e => {
-            if (!mouseDown) return;
-            mouseDown = false;
-            touchEndX = e.screenX;
-            touchEndY = e.screenY;
-            touchStartY = mouseStartY;
-            handleSwipe();
-        });
-
+        document.addEventListener('mouseup', e => { if (!mouseDown) return; mouseDown = false; touchEndX = e.screenX; touchEndY = e.screenY; touchStartY = mouseStartY; handleSwipe(); });
         document.addEventListener('keydown', e => {
             if (e.key === 'ArrowRight' && currentDay < days.length - 1) { currentDay++; renderDaysNav(); renderSchedule(); updateStats(); }
             else if (e.key === 'ArrowLeft' && currentDay > 0) { currentDay--; renderDaysNav(); renderSchedule(); updateStats(); }
@@ -1024,21 +946,10 @@
 
         function startAutoSwitch() {
             if (window.innerWidth >= 768 && window.innerHeight > window.innerWidth) {
-                autoSwitchInterval = setInterval(() => {
-                    currentDay = (currentDay + 1) % days.length;
-                    renderDaysNav();
-                    renderSchedule();
-                    updateStats();
-                }, 10000);
+                autoSwitchInterval = setInterval(() => { currentDay = (currentDay + 1) % days.length; renderDaysNav(); renderSchedule(); updateStats(); }, 10000);
             }
         }
-
-        function stopAutoSwitch() {
-            if (autoSwitchInterval) {
-                clearInterval(autoSwitchInterval);
-                autoSwitchInterval = null;
-            }
-        }
+        function stopAutoSwitch() { if (autoSwitchInterval) { clearInterval(autoSwitchInterval); autoSwitchInterval = null; } }
 
         updateCurrentTime();
         updateBadges();
@@ -1053,11 +964,7 @@
         document.getElementById('colorModal').addEventListener('click', e => { if (e.target.id === 'colorModal') closeColorModal(); });
         document.getElementById('groupModal').addEventListener('click', e => { if (e.target.id === 'groupModal') closeGroupModal(); });
         document.getElementById('teacherModal').addEventListener('click', e => { if (e.target.id === 'teacherModal') closeTeacherModal(); });
-
-        window.addEventListener('resize', () => {
-            stopAutoSwitch();
-            startAutoSwitch();
-        });
+        window.addEventListener('resize', () => { stopAutoSwitch(); startAutoSwitch(); });
     </script>
 </body>
 </html>
