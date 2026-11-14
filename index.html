@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Расписание КИТИС</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -11,80 +11,53 @@
             background: linear-gradient(135deg, #5a7d9a 0%, #7a9bb5 100%);
             min-height: 100vh;
             padding: 16px;
-            overflow-x: hidden;
-            touch-action: pan-y;
         }
-        .container { max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; min-height: calc(100vh - 32px); }
+        .container { max-width: 500px; margin: 0 auto; }
         .header { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .header h1 { color: #333; font-size: 20px; font-weight: 700; }
-        .header-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        .badge { padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
-        .badge:hover { transform: scale(1.05); }
+        .header-badges { display: flex; gap: 6px; }
+        .badge { padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
         .group-badge { background: #5a7d9a; color: white; }
         .teacher-badge { background: #7a9bb5; color: white; }
         .badge.inactive { background: #e0e0e0; color: #999; }
-        .mode-indicator { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.3); font-weight: 500; }
         .current-time { color: #666; font-size: 13px; }
-        .stats-bar { background: rgba(255,255,255,0.95); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-around; box-shadow: 0 2px 10px rgba(0,0,0,0.08); font-size: 11px; color: #555; }
+        .stats-bar { background: white; border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-around; font-size: 11px; color: #555; }
         .stat-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
         .stat-value { font-size: 16px; font-weight: 700; color: #5a7d9a; }
-        .days-nav { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; scroll-behavior: smooth; }
-        .days-nav::-webkit-scrollbar { height: 4px; }
-        .days-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 2px; }
-        .day-btn { flex-shrink: 0; background: white; border: none; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; color: #555; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-        .day-btn.active { background: #5a7d9a; color: white; transform: scale(1.05); }
-        .schedule { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); transition: transform 0.3s; flex: 1; }
-        .schedule.swiping { transition: none; }
-        .lesson-card { border-radius: 12px; padding: 14px; margin-bottom: 12px; border-left: 4px solid #5a7d9a; transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden; background: white; }
-        .lesson-card:last-child { margin-bottom: 0; }
-        .lesson-card.upcoming { background: #f8f9fa; }
-        .lesson-card.next { background: linear-gradient(to right, #fff3cd 0%, #fff3cd 100%); border-left-color: #ffc107; }
-        .lesson-card.current { border-left-color: #28a745; }
-        .lesson-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; position: relative; z-index: 2; }
+        .days-nav { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; }
+        .day-btn { flex-shrink: 0; background: white; border: none; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; color: #555; cursor: pointer; }
+        .day-btn.active { background: #5a7d9a; color: white; }
+        .schedule { background: white; border-radius: 16px; padding: 16px; min-height: 300px; }
+        .lesson-card { border-radius: 12px; padding: 14px; margin-bottom: 12px; border-left: 4px solid #5a7d9a; background: white; }
+        .lesson-card.current { border-left-color: #28a745; background: #e8f4f8; }
+        .lesson-card.next { border-left-color: #ffc107; background: #fff3cd; }
+        .lesson-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .lesson-number-wrap { display: flex; align-items: center; gap: 8px; }
-        .lesson-number { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; color: white; flex-shrink: 0; }
-        .lesson-time { color: #666; font-size: 12px; font-weight: 500; }
-        .lesson-name { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 8px; line-height: 1.3; display: flex; align-items: center; gap: 8px; position: relative; z-index: 2; }
-        .lesson-icon { font-size: 18px; flex-shrink: 0; }
-        .lesson-details { display: flex; gap: 12px; flex-wrap: nowrap; overflow: hidden; position: relative; z-index: 2; }
-        .detail-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
-        .detail-item .icon { font-size: 13px; flex-shrink: 0; }
-        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; margin-top: 8px; position: relative; z-index: 2; }
+        .lesson-number { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; color: white; }
+        .lesson-time { color: #666; font-size: 12px; }
+        .lesson-name { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 8px; }
+        .lesson-details { display: flex; gap: 12px; font-size: 11px; color: #666; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; margin-top: 8px; }
         .status-current { background: #28a745; color: white; }
         .status-next { background: #ffc107; color: #333; }
         .status-upcoming { background: #e9ecef; color: #666; }
-        .timer-badge { display: inline-block; padding: 3px 8px; background: #28a745; color: white; border-radius: 6px; font-size: 10px; font-weight: 600; margin-top: 6px; margin-left: 8px; position: relative; z-index: 2; }
         .no-lessons { text-align: center; padding: 40px 20px; color: #666; }
         .no-lessons .emoji { font-size: 48px; margin-bottom: 12px; }
-        .swipe-hint { text-align: center; color: rgba(255,255,255,0.7); font-size: 11px; margin-top: 12px; padding: 6px; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal.active { display: flex; }
         .modal-content { background: white; border-radius: 16px; padding: 20px; max-width: 400px; width: 100%; max-height: 80vh; overflow-y: auto; }
         .modal-content h3 { margin-bottom: 16px; color: #333; text-align: center; font-size: 16px; }
         .list-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 50vh; overflow-y: auto; }
-        .list-item { padding: 12px; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; font-size: 14px; font-weight: 600; color: #333; }
-        .list-item:hover { background: #5a7d9a; color: white; border-color: #5a7d9a; }
-        .list-item.active { background: #5a7d9a; color: white; border-color: #5a7d9a; }
-        .reset-btn { width: 100%; padding: 10px; background: #e0e0e0; color: #555; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; margin-bottom: 10px; }
+        .list-item { padding: 12px; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; text-align: center; font-size: 14px; font-weight: 600; color: #333; }
+        .list-item:hover { background: #5a7d9a; color: white; }
+        .list-item.active { background: #5a7d9a; color: white; }
         .search-input { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; margin-bottom: 12px; }
-        .search-input:focus { outline: none; border-color: #5a7d9a; }
         .modal-close { width: 100%; padding: 10px; background: #5a7d9a; color: white; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; }
         .refresh-btn { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; margin-bottom: 10px; font-weight: 600; }
-        .refresh-btn:disabled { background: #999; cursor: not-allowed; }
-        .loading-text { text-align: center; padding: 20px; color: #5a7d9a; font-size: 13px; }
+        .refresh-btn:disabled { background: #999; }
+        .loading-text { text-align: center; padding: 20px; color: #5a7d9a; }
         .status-line { text-align: center; font-size: 10px; color: #888; padding: 4px 0; }
-        @media (min-width: 768px) and (orientation: portrait) {
-            body { padding: 40px; } .container { max-width: 900px; } .header { padding: 32px; } .header h1 { font-size: 48px; }
-            .current-time { font-size: 28px; } .badge { font-size: 22px; padding: 8px 18px; }
-            .stats-bar { padding: 20px; font-size: 18px; } .stat-value { font-size: 28px; }
-            .day-btn { padding: 20px 32px; font-size: 24px; } .schedule { padding: 32px; }
-            .lesson-card { padding: 28px; margin-bottom: 24px; border-left-width: 8px; }
-            .lesson-number { width: 56px; height: 56px; font-size: 24px; } .lesson-time { font-size: 24px; }
-            .lesson-name { font-size: 32px; } .lesson-icon { font-size: 36px; } .detail-item { font-size: 22px; }
-            .status-badge { padding: 8px 20px; font-size: 20px; } .timer-badge { padding: 6px 14px; font-size: 18px; }
-            .swipe-hint { display: none; }
-        }
     </style>
 </head>
 <body>
@@ -93,8 +66,8 @@
             <div class="header-top">
                 <h1>📚 КИТИС</h1>
                 <div class="header-badges">
-                    <span class="badge group-badge" id="groupBadge" onclick="openGroupModal(event)">👥 Группа</span>
-                    <span class="badge teacher-badge inactive" id="teacherBadge" onclick="openTeacherModal(event)">👨‍🏫 Преподаватель</span>
+                    <span class="badge group-badge" id="groupBadge">👥 Группа</span>
+                    <span class="badge teacher-badge inactive" id="teacherBadge">👨‍🏫 Преподаватель</span>
                 </div>
             </div>
             <div class="current-time" id="currentTime"></div>
@@ -107,276 +80,210 @@
         <div class="days-nav" id="daysNav"></div>
         <div class="schedule" id="schedule"></div>
         <div class="status-line" id="statusLine"></div>
-        <div class="swipe-hint">Свайп для смены дня 👉</div>
     </div>
 
     <div class="modal" id="groupModal">
         <div class="modal-content">
             <h3>Выберите группу</h3>
-            <button class="refresh-btn" id="refreshGroupBtn" onclick="refreshData('group')">🔄 Загрузить с сайта КИТИС</button>
-            <input type="text" class="search-input" id="groupSearch" placeholder="Поиск группы..." oninput="renderList('group')">
+            <button class="refresh-btn" id="refreshGroupBtn">🔄 Загрузить с сайта КИТИС</button>
+            <input type="text" class="search-input" id="groupSearch" placeholder="Поиск группы...">
             <div class="list-container" id="groupList"><div class="loading-text">Загрузка...</div></div>
-            <button class="modal-close" onclick="closeModal('group')">Закрыть</button>
+            <button class="modal-close" id="closeGroupBtn">Закрыть</button>
         </div>
     </div>
 
     <div class="modal" id="teacherModal">
         <div class="modal-content">
             <h3>Выберите преподавателя</h3>
-            <button class="reset-btn" id="resetTeacherBtn" onclick="resetToGroup()" style="display:none;">✕ Вернуться к группе</button>
-            <button class="refresh-btn" id="refreshTeacherBtn" onclick="refreshData('teacher')">🔄 Загрузить с сайта КИТИС</button>
-            <input type="text" class="search-input" id="teacherSearch" placeholder="Поиск преподавателя..." oninput="renderList('teacher')">
+            <button class="refresh-btn" id="refreshTeacherBtn">🔄 Загрузить с сайта КИТИС</button>
+            <input type="text" class="search-input" id="teacherSearch" placeholder="Поиск преподавателя...">
             <div class="list-container" id="teacherList"><div class="loading-text">Загрузка...</div></div>
-            <button class="modal-close" onclick="closeModal('teacher')">Закрыть</button>
-        </div>
-    </div>
-
-    <div class="modal" id="colorModal">
-        <div class="modal-content">
-            <h3>Цвет предмета</h3>
-            <div id="colorPicker" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;"></div>
-            <button class="modal-close" onclick="document.getElementById('colorModal').classList.remove('active')">Закрыть</button>
+            <button class="modal-close" id="closeTeacherBtn">Закрыть</button>
         </div>
     </div>
 
     <script>
-        // ===== ПАРСЕР КИТИС (windows-1251) =====
-        var ENTITIES = { nbsp: ' ', quot: '"', amp: '&', lt: '<', gt: '>', laquo: '«', raquo: '»', ndash: '–', mdash: '—' };
-        function text(html) {
-            return String(html || '')
-                .replace(/<br\s*\/?>/gi, ' ')
-                .replace(/<[^>]*>/g, '')
-                .replace(/&(#\d+|[a-z]+);/gi, function (all, name) {
-                    if (name.charAt(0) === '#') return String.fromCharCode(parseInt(name.slice(1), 10));
-                    return ENTITIES[name.toLowerCase()] != null ? ENTITIES[name.toLowerCase()] : all;
-                })
-                .replace(/\s+/g, ' ')
-                .trim();
-        }
-        function attr(attrs, name) {
-            var m = new RegExp('\\b' + name + '\\s*=\\s*(?:"([^"]*)"|\'([^\']*)\'|([^\\s>]+))', 'i').exec(attrs || '');
-            return m ? (m[1] != null ? m[1] : m[2] != null ? m[2] : m[3]) : null;
-        }
-        function anchors(html) {
-            var out = [];
-            var re = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi;
-            var m;
-            while ((m = re.exec(html))) {
-                out.push({ href: attr(m[1], 'href') || '', cls: attr(m[1], 'class') || '', text: text(m[2]) });
-            }
-            return out;
-        }
-        function idOf(href, prefix) {
-            var m = new RegExp('^.?/?' + prefix + '(\\d+)\\.htm$', 'i').exec(String(href || '').trim());
-            return m ? parseInt(m[1], 10) : null;
-        }
-        function parseList(html, prefix) {
-            var seen = {};
-            return anchors(html).reduce(function (acc, a) {
-                var id = idOf(a.href, prefix);
-                if (id != null && a.text && !seen[id]) { seen[id] = 1; acc.push({ id: id, name: a.text }); }
-                return acc;
-            }, []);
-        }
-        function rows(html) { return String(html).split(/<tr\b[^>]*>/i).slice(1); }
-        function cells(row) {
-            var out = [];
-            var re = /<td\b([^>]*)>([\s\S]*?)(?=<td\b|<\/tr>|$)/gi;
-            var m;
-            while ((m = re.exec(row))) {
-                out.push({ attrs: m[1], html: m[2].replace(/<\/td>\s*$/i, ''), cls: (attr(m[1], 'class') || '').toLowerCase() });
-            }
-            return out;
-        }
-        function parseWeek(html) {
-            var out = [];
-            var date = null;
-            rows(html).forEach(function (r) {
-                var c = cells(r);
-                var i = 0;
-                if (c[0] && /\d{2}\.\d{2}\.\d{4}/.test(text(c[0].html))) { date = text(c[0].html); i = 1; }
-                if (!date || !c[i] || c[i].cls !== 'hd') return;
-                var pair = parseInt(text(c[i].html), 10);
-                if (!pair) return;
-                var col = 0;
-                c.slice(i + 1).forEach(function (cell) {
-                    var span = parseInt(attr(cell.attrs, 'colspan') || '1', 10) || 1;
-                    var sub = span >= 2 ? 0 : col + 1;
-                    col += span;
-                    if (cell.cls === 'nul' || !text(cell.html)) return;
-                    var cur = null;
-                    var list = [];
-                    anchors(cell.html).forEach(function (a) {
-                        var j = idOf(a.href, 'j');
-                        if (j != null || /\bz1\b/.test(a.cls)) {
-                            cur = { date: date, pair: pair, sub: sub, subject: a.text, rooms: [], teachers: [] };
-                            list.push(cur);
-                        } else if (cur && (idOf(a.href, 'ca') != null || /\bz2\b/.test(a.cls))) {
-                            cur.rooms.push(a.text);
-                        } else if (cur && (idOf(a.href, 'cp') != null || /\bz3\b/.test(a.cls))) {
-                            cur.teachers.push(a.text);
-                        }
-                    });
-                    if (!list.length) list.push({ date: date, pair: pair, sub: sub, subject: text(cell.html), rooms: [], teachers: [] });
-                    out.push.apply(out, list);
-                });
-            });
-            return out;
-        }
-
-        // ===== СЕТЬ: прокси + windows-1251 =====
         var BASE_URL = 'http://94.72.18.202:8083';
         var PROXIES = [
-            function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
-            function (u) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); },
-            function (u) { return 'https://corsproxy.io/?' + encodeURIComponent(u); }
+            function(u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
+            function(u) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); }
         ];
 
-        function setStatus(msg) { document.getElementById('statusLine').textContent = msg || ''; }
-
         async function fetchProxy(url) {
-            for (var p = 0; p < PROXIES.length; p++) {
+            for (var i = 0; i < PROXIES.length; i++) {
                 try {
-                    var resp = await fetch(PROXIES[p](url));
+                    var resp = await fetch(PROXIES[i](url));
                     if (!resp.ok) continue;
                     var buf = await resp.arrayBuffer();
                     var html = new TextDecoder('windows-1251').decode(buf);
-                    if (!html || html.length < 300) continue;
-                    if (/Not Found|Forbidden|Access Denied/i.test(html.slice(0, 1500)) && !/Список|cg\d|\.htm/i.test(html)) continue;
-                    return html;
-                } catch (e) { /* следующий прокси */ }
+                    if (html && html.length > 300) return html;
+                } catch (e) {}
             }
             return null;
         }
 
-        // ===== ДАННЫЕ =====
-        var bells = { 1: '8:30-10:00', 2: '10:15-11:45', 3: '12:15-13:45', 4: '14:00-15:30', 5: '15:45-17:15', 6: '17:30-19:00' };
-        var iconMap = [
-            { keys: ['матем','алгебр','геом','анализ'], icon: '📐' },
-            { keys: ['физ'], icon: '🔬' },
-            { keys: ['информ','вычисл','программ','бд','базы'], icon: '💻' },
-            { keys: ['англ','язык','немец'], icon: '🌍' },
-            { keys: ['истор','краевед'], icon: '📜' },
-            { keys: ['литерат','русск'], icon: '📖' },
-            { keys: ['биолог','ботаник','эколог'], icon: '🧬' },
-            { keys: ['химия','химии'], icon: '⚗️' },
-            { keys: ['географ','геодез'], icon: '🗺️' },
-            { keys: ['физкультур','спорт'], icon: '⚽' },
-            { keys: ['обж','безопасн'], icon: '🛡️' },
-            { keys: ['общество','прав','социол'], icon: '🏛️' },
-            { keys: ['электр','радио','схемотехн'], icon: '⚡' },
-            { keys: ['механик','деталей','черчен'], icon: '⚙️' },
-            { keys: ['экономи','менедж','бухгалт'], icon: '💰' },
-            { keys: ['философ','психолог','педагог'], icon: '🧠' }
-        ];
-        function getIcon(name) {
-            var lower = String(name || '').toLowerCase();
-            for (var i = 0; i < iconMap.length; i++) {
-                if (iconMap[i].keys.some(function (k) { return lower.indexOf(k) >= 0; })) return iconMap[i].icon;
-            }
-            return '📚';
+        function text(html) {
+            return String(html || '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
         }
 
-        var days = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+        function parseList(html, prefix) {
+            var result = [];
+            var links = html.match(/<a[^>]*href=["']([^"']+)["'][^>]*>([^<]*)<\/a>/gi) || [];
+            links.forEach(function(link) {
+                var hrefMatch = link.match(/href=["']([^"']+)["']/i);
+                var textMatch = link.match(/>([^<]*)</i);
+                if (hrefMatch && textMatch) {
+                    var href = hrefMatch[1];
+                    var name = textMatch[1].trim();
+                    var idMatch = href.match(new RegExp(prefix + '(\\d+)\\.htm', 'i'));
+                    if (idMatch && name) {
+                        result.push({ id: parseInt(idMatch[1]), name: name });
+                    }
+                }
+            });
+            return result;
+        }
+
+        function parseWeek(html) {
+            var result = [];
+            var rows = html.split(/<tr[^>]*>/i);
+            var currentDate = null;
+            for (var i = 1; i < rows.length; i++) {
+                var row = rows[i];
+                var cells = row.split(/<td[^>]*>/i);
+                if (cells.length < 2) continue;
+                var firstCell = text(cells[1] || '');
+                if (/\d{2}\.\d{2}\.\d{4}/.test(firstCell)) {
+                    currentDate = firstCell;
+                }
+                if (!currentDate) continue;
+                for (var j = 1; j < cells.length; j++) {
+                    var cell = cells[j];
+                    var cellText = text(cell);
+                    if (/^\d+$/.test(cellText)) {
+                        var pair = parseInt(cellText);
+                        var subject = '';
+                        var rooms = [];
+                        var teachers = [];
+                        var links = cell.match(/<a[^>]*>([^<]*)<\/a>/gi) || [];
+                        links.forEach(function(link) {
+                            var linkText = link.match(/>([^<]*)</i)[1];
+                            if (link.indexOf('ca') >= 0 || link.indexOf('z2') >= 0) {
+                                rooms.push(linkText);
+                            } else if (link.indexOf('cp') >= 0 || link.indexOf('z3') >= 0) {
+                                teachers.push(linkText);
+                            } else if (link.indexOf('j') >= 0 || link.indexOf('z1') >= 0) {
+                                subject = linkText;
+                            }
+                        });
+                        if (!subject) subject = cellText;
+                        if (subject && subject !== cellText) {
+                            result.push({ date: currentDate, pair: pair, subject: subject, rooms: rooms, teachers: teachers });
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        var bells = { 1: '8:30-10:00', 2: '10:15-11:45', 3: '12:15-13:45', 4: '14:00-15:30', 5: '15:45-17:15', 6: '17:30-19:00' };
+        var days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
         var groupsData = JSON.parse(localStorage.getItem('kitis_groups') || '[]');
         var teachersData = JSON.parse(localStorage.getItem('kitis_teachers') || '[]');
-        var currentGroup = localStorage.getItem('kitis_cur_group') || (groupsData[0] && groupsData[0].name) || '';
+        var currentGroup = localStorage.getItem('kitis_cur_group') || '';
         var currentTeacher = localStorage.getItem('kitis_cur_teacher') || null;
         var viewMode = currentTeacher ? 'teacher' : 'group';
         var currentDay = new Date().getDay();
         currentDay = currentDay === 0 ? 6 : currentDay - 1;
-        var selectedLesson = null;
-        var colors = ['#A8D8EA','#AA96DA','#FCBAD3','#FFFFD2','#A8E6CF','#FFD3B6','#D4A5A5','#B5EAD7','#C7CEEA','#F8B195','#E2F0CB','#FFDAC1'];
 
-        function schedKey() {
-            return viewMode === 'teacher' ? 'kitis_sched_T_' + currentTeacher : 'kitis_sched_G_' + currentGroup;
-        }
-        function colorsKey() {
-            return viewMode === 'teacher' ? 'kitis_colors_T_' + currentTeacher : 'kitis_colors_' + currentGroup;
-        }
-        function getCurrentSchedule() {
-            var cached = localStorage.getItem(schedKey());
-            return cached ? JSON.parse(cached) : {};
-        }
+        function setStatus(msg) { document.getElementById('statusLine').textContent = msg || ''; }
 
-        function transformSchedule(parsedWeek) {
-            var result = {};
-            var dayNames = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
-            parsedWeek.forEach(function (lesson) {
-                var parts = lesson.date.split('.');
-                var d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
-                var dayName = dayNames[d.getDay()];
-                if (!result[dayName]) result[dayName] = [];
-                result[dayName].push({
-                    time: bells[lesson.pair] || (lesson.pair + ' пара'),
-                    pairNum: lesson.pair,
-                    name: lesson.subject,
-                    room: lesson.rooms.join(', ') || '—',
-                    teacher: lesson.teachers.join(', ') || '—',
-                    icon: getIcon(lesson.subject)
-                });
-            });
-            for (var day in result) result[day].sort(function (a, b) { return a.pairNum - b.pairNum; });
-            return result;
-        }
-
-        async function refreshData(type) {
-            var btn = document.getElementById(type === 'group' ? 'refreshGroupBtn' : 'refreshTeacherBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Загрузка...';
-            setStatus('Загрузка списка ' + (type === 'group' ? 'групп' : 'преподавателей') + '...');
-            var page = type === 'group' ? 'cg.htm' : 'cp.htm';
-            var prefix = type === 'group' ? 'cg' : 'cp';
-            var html = await fetchProxy(BASE_URL + '/' + page);
-            if (html) {
-                var list = parseList(html, prefix);
-                if (type === 'group') { groupsData = list; localStorage.setItem('kitis_groups', JSON.stringify(list)); }
-                else { teachersData = list; localStorage.setItem('kitis_teachers', JSON.stringify(list)); }
-                setStatus('Список загружен: ' + list.length);
-                btn.textContent = '✅ Обновлено!';
-            } else {
-                setStatus('❌ Не удалось загрузить (прокси или сервер недоступны)');
-                btn.textContent = '❌ Ошибка — повторить';
-            }
-            renderList(type);
-            setTimeout(function () { btn.textContent = '🔄 Загрузить с сайта КИТИС'; btn.disabled = false; }, 1500);
-        }
-
-        async function loadScheduleForItem(item, type) {
-            var prefix = type === 'group' ? 'cg' : 'cp';
-            setStatus('Загрузка расписания: ' + item.name + '...');
-            var html = await fetchProxy(BASE_URL + '/' + prefix + item.id + '.htm');
-            if (html) {
-                var parsed = transformSchedule(parseWeek(html));
-                var key = (type === 'group' ? 'kitis_sched_G_' : 'kitis_sched_T_') + item.name;
-                localStorage.setItem(key, JSON.stringify(parsed));
-                localStorage.setItem(key + '_time', new Date().toLocaleString('ru-RU'));
-                setStatus('Расписание загружено ✅');
-                return parsed;
-            }
-            setStatus('❌ Расписание не загрузилось');
-            return null;
-        }
-
-        // ===== UI =====
         function updateCurrentTime() {
             var n = new Date();
-            document.getElementById('currentTime').textContent =
-                n.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }) + ', ' +
-                n.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('currentTime').textContent = n.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }) + ', ' + n.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
         }
+
         function updateBadges() {
-            var gb = document.getElementById('groupBadge'), tb = document.getElementById('teacherBadge');
+            var gb = document.getElementById('groupBadge');
+            var tb = document.getElementById('teacherBadge');
             if (viewMode === 'teacher') {
-                gb.classList.add('inactive'); gb.textContent = '👥 ' + currentGroup;
-                tb.classList.remove('inactive'); tb.innerHTML = '👨‍🏫 ' + currentTeacher + ' <span class="mode-indicator">активно</span>';
+                gb.classList.add('inactive');
+                gb.textContent = '👥 ' + currentGroup;
+                tb.classList.remove('inactive');
+                tb.textContent = '👨‍🏫 ' + currentTeacher;
             } else {
-                gb.classList.remove('inactive'); gb.textContent = '👥 ' + currentGroup;
-                tb.classList.add('inactive'); tb.textContent = '👨‍🏫 Преподаватель';
+                gb.classList.remove('inactive');
+                gb.textContent = '👥 ' + currentGroup;
+                tb.classList.add('inactive');
+                tb.textContent = '👨‍🏫 Преподаватель';
             }
         }
+
+        function renderDaysNav() {
+            var nav = document.getElementById('daysNav');
+            nav.innerHTML = '';
+            days.forEach(function(d, i) {
+                var btn = document.createElement('button');
+                btn.className = 'day-btn' + (i === currentDay ? ' active' : '');
+                btn.textContent = d;
+                btn.onclick = function() { currentDay = i; renderDaysNav(); renderSchedule(); };
+                nav.appendChild(btn);
+            });
+        }
+
+        function renderSchedule() {
+            var div = document.getElementById('schedule');
+            var key = viewMode === 'teacher' ? 'kitis_sched_T_' + currentTeacher : 'kitis_sched_G_' + currentGroup;
+            var schedule = JSON.parse(localStorage.getItem(key) || '{}');
+            var dayName = days[currentDay];
+            var lessons = schedule[dayName] || [];
+
+            if (Object.keys(schedule).length === 0) {
+                div.innerHTML = '<div class="no-lessons"><div class="emoji">📥</div><div>Нет данных<br><small>Нажми «👥 Группа» → «Загрузить»</small></div></div>';
+                return;
+            }
+
+            if (lessons.length === 0) {
+                div.innerHTML = '<div class="no-lessons"><div class="emoji">🎉</div><div>Нет пар</div></div>';
+                return;
+            }
+
+            var now = new Date();
+            var todayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
+            var isToday = currentDay === todayIndex;
+            var html = '';
+
+            lessons.forEach(function(lesson, index) {
+                var times = lesson.time.split('-');
+                var startParts = times[0].split(':').map(Number);
+                var endParts = times[1].split(':').map(Number);
+                var start = new Date().setHours(startParts[0], startParts[1], 0, 0);
+                var end = new Date().setHours(endParts[0], endParts[1], 0, 0);
+                var cardClass = '';
+                var status = '<span class="status-badge status-upcoming">Предстоит</span>';
+
+                if (isToday && now.getTime() >= start && now.getTime() <= end) {
+                    cardClass = 'current';
+                    status = '<span class="status-badge status-current">Сейчас</span>';
+                } else if (isToday && now.getTime() < start && (index === 0 || now.getTime() > new Date().setHours(...lessons[index-1].time.split('-')[1].split(':').map(Number), 0, 0))) {
+                    cardClass = 'next';
+                    status = '<span class="status-badge status-next">Следующая</span>';
+                }
+
+                html += '<div class="lesson-card ' + cardClass + '">' +
+                    '<div class="lesson-header"><div class="lesson-number-wrap"><div class="lesson-number" style="background:#5a7d9a">' + (index + 1) + '</div><span class="lesson-time">' + lesson.time + '</span></div></div>' +
+                    '<div class="lesson-name">' + lesson.name + '</div>' +
+                    '<div class="lesson-details"><span>🚪 ' + lesson.room + '</span><span>👨‍🏫 ' + lesson.teacher + '</span></div>' +
+                    status + '</div>';
+            });
+
+            div.innerHTML = html;
+        }
+
         function updateStats() {
-            var lessons = getCurrentSchedule()[days[currentDay]] || [];
+            var key = viewMode === 'teacher' ? 'kitis_sched_T_' + currentTeacher : 'kitis_sched_G_' + currentGroup;
+            var schedule = JSON.parse(localStorage.getItem(key) || '{}');
+            var lessons = schedule[days[currentDay]] || [];
             document.getElementById('totalLessons').textContent = lessons.length;
             if (lessons.length > 0) {
                 document.getElementById('firstLesson').textContent = lessons[0].time.split('-')[0];
@@ -386,182 +293,137 @@
                 document.getElementById('lastLesson').textContent = '-';
             }
         }
-        function renderDaysNav() {
-            var nav = document.getElementById('daysNav');
-            nav.innerHTML = '';
-            days.forEach(function (d, i) {
-                var b = document.createElement('button');
-                b.className = 'day-btn ' + (i === currentDay ? 'active' : '');
-                b.textContent = d;
-                b.onclick = function () { currentDay = i; renderDaysNav(); renderSchedule(); updateStats(); };
-                nav.appendChild(b);
-            });
-        }
-        function parseTime(t) {
-            var parts = String(t).split('-');
-            var a = parts[0].split(':').map(Number);
-            var b = parts[1].split(':').map(Number);
-            return { start: new Date().setHours(a[0], a[1], 0, 0), end: new Date().setHours(b[0], b[1], 0, 0) };
-        }
-        function renderSchedule() {
-            var div = document.getElementById('schedule');
-            var dayName = days[currentDay];
-            var schedule = getCurrentSchedule();
-            var lessons = schedule[dayName] || [];
-            var updated = localStorage.getItem(schedKey() + '_time');
 
-            if (Object.keys(schedule).length === 0) {
-                div.innerHTML = '<div class="no-lessons"><div class="emoji">📥</div><div>Нет данных<br><small style="color:#999;font-size:11px;">Нажми «👥 Группа» → «Загрузить с сайта КИТИС»</small></div></div>';
-                return;
-            }
-            if (lessons.length === 0) {
-                div.innerHTML = '<div class="no-lessons"><div class="emoji">🎉</div><div>Нет пар</div>' + (updated ? '<div style="font-size:10px;color:#999;margin-top:8px;">Обновлено: ' + updated + '</div>' : '') + '</div>';
-                return;
-            }
-
-            var now = new Date();
-            var todayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
-            var isToday = currentDay === todayIndex;
-            var isTeacherMode = viewMode === 'teacher';
-            var lc = JSON.parse(localStorage.getItem(colorsKey()) || '{}');
-            var html = updated ? '<div style="background:#e8f4f8;padding:6px 12px;border-radius:8px;font-size:10px;color:#5a7d9a;margin-bottom:12px;">🔄 Обновлено: ' + updated + '</div>' : '';
-
-            lessons.forEach(function (lesson, index) {
-                var times = parseTime(lesson.time);
-                var status = '', cardClass = '', timerHtml = '', bgStyle = '';
-                var colorKey = dayName + '-' + lesson.name;
-                var lessonColor = lc[colorKey] || '#5a7d9a';
-
-                if (isToday && now.getTime() >= times.start && now.getTime() <= times.end) {
-                    status = '<span class="status-badge status-current">Сейчас</span>';
-                    cardClass = 'current';
-                    var progress = Math.min(100, Math.max(0, ((now.getTime() - times.start) / (times.end - times.start)) * 100));
-                    var remaining = Math.ceil((times.end - now.getTime()) / 60000);
-                    bgStyle = 'background: linear-gradient(to right, rgba(40,167,69,0.55) ' + progress + '%, white ' + progress + '%);';
-                    timerHtml = '<span class="timer-badge">⏱ ' + remaining + ' мин</span>';
-                } else if (isToday && now.getTime() < times.start && (index === 0 || now.getTime() > parseTime(lessons[index - 1].time).end)) {
-                    status = '<span class="status-badge status-next">Следующая</span>';
-                    cardClass = 'next';
-                    var mins = Math.ceil((times.start - now.getTime()) / 60000);
-                    timerHtml = '<span class="timer-badge" style="background:#ffc107;color:#333">⏱ через ' + mins + ' мин</span>';
-                } else {
-                    status = '<span class="status-badge status-upcoming">Предстоит</span>';
-                    cardClass = 'upcoming';
-                }
-
-                var firstDetail = isTeacherMode
-                    ? '<div class="detail-item"><span class="icon">👥</span><span>Группы</span></div>'
-                    : '<div class="detail-item"><span class="icon">🚪</span><span>Каб. ' + lesson.room + '</span></div>';
-                var secondDetail = isTeacherMode
-                    ? '<div class="detail-item"><span class="icon">🚪</span><span>Каб. ' + lesson.room + '</span></div>'
-                    : '<div class="detail-item"><span class="icon">👨‍🏫</span><span>' + lesson.teacher + '</span></div>';
-
-                html += '<div class="lesson-card ' + cardClass + '" style="border-left-color:' + lessonColor + ';' + bgStyle + '" onclick="openColorModal(\'' + colorKey + '\',\'' + lessonColor + '\')">' +
-                    '<div class="lesson-header"><div class="lesson-number-wrap"><div class="lesson-number" style="background:' + lessonColor + '">' + (index + 1) + '</div><span class="lesson-time">' + lesson.time + '</span></div></div>' +
-                    '<div class="lesson-name"><span class="lesson-icon">' + lesson.icon + '</span>' + lesson.name + '</div>' +
-                    '<div class="lesson-details">' + firstDetail + secondDetail + '</div>' + status + timerHtml + '</div>';
-            });
-            div.innerHTML = html;
-        }
-
-        // ===== МОДАЛКИ =====
         function renderList(type) {
             var data = type === 'group' ? groupsData : teachersData;
             var list = document.getElementById(type + 'List');
             var q = document.getElementById(type + 'Search').value.toLowerCase();
             var current = type === 'group' ? currentGroup : currentTeacher;
-            var modeOk = type === 'group' ? viewMode === 'group' : viewMode === 'teacher';
+
             if (data.length === 0) {
-                list.innerHTML = '<div class="loading-text">Нажмите «Загрузить с сайта КИТИС»</div>';
+                list.innerHTML = '<div class="loading-text">Нажми «Загрузить с сайта КИТИС»</div>';
                 return;
             }
-            list.innerHTML = data.filter(function (item) { return item.name.toLowerCase().indexOf(q) >= 0; }).map(function (item) {
-                var active = item.name === current && modeOk ? ' active' : '';
-                return '<div class="list-item' + active + '" onclick="selectItem(\'' + type + '\', \'' + item.name.replace(/'/g, "\\'') + '\', ' + item.id + ')">' + item.name + '</div>';
+
+            list.innerHTML = data.filter(function(item) { return item.name.toLowerCase().indexOf(q) >= 0; }).map(function(item) {
+                var active = item.name === current ? ' active' : '';
+                return '<div class="list-item' + active + '" data-type="' + type + '" data-name="' + item.name + '" data-id="' + item.id + '">' + item.name + '</div>';
             }).join('');
+
+            list.querySelectorAll('.list-item').forEach(function(el) {
+                el.onclick = function() {
+                    var t = el.dataset.type;
+                    var n = el.dataset.name;
+                    var id = parseInt(el.dataset.id);
+                    selectItem(t, n, id);
+                };
+            });
         }
+
         async function selectItem(type, name, id) {
             if (type === 'group') {
-                currentGroup = name; viewMode = 'group'; currentTeacher = null;
+                currentGroup = name;
+                viewMode = 'group';
+                currentTeacher = null;
                 localStorage.setItem('kitis_cur_group', name);
                 localStorage.removeItem('kitis_cur_teacher');
             } else {
-                currentTeacher = name; viewMode = 'teacher';
+                currentTeacher = name;
+                viewMode = 'teacher';
                 localStorage.setItem('kitis_cur_teacher', name);
             }
             updateBadges();
             closeModal(type);
-            var sched = getCurrentSchedule();
-            if (Object.keys(sched).length === 0) {
-                document.getElementById('schedule').innerHTML = '<div class="loading-text">Загрузка расписания...</div>';
-                await loadScheduleForItem({ name: name, id: id }, type);
-            }
+            await loadSchedule(name, id, type);
             renderSchedule();
             updateStats();
         }
-        function resetToGroup() {
-            currentTeacher = null; viewMode = 'group';
-            localStorage.removeItem('kitis_cur_teacher');
-            updateBadges(); closeModal('teacher');
-            renderSchedule(); updateStats();
-        }
-        function openGroupModal(e) { e.stopPropagation(); renderList('group'); document.getElementById('groupModal').classList.add('active'); }
-        function openTeacherModal(e) { e.stopPropagation(); document.getElementById('resetTeacherBtn').style.display = viewMode === 'teacher' ? 'block' : 'none'; renderList('teacher'); document.getElementById('teacherModal').classList.add('active'); }
-        function closeModal(type) { document.getElementById(type + 'Modal').classList.remove('active'); }
 
-        function openColorModal(key, color) {
-            selectedLesson = key;
-            var picker = document.getElementById('colorPicker');
-            picker.innerHTML = '';
-            colors.forEach(function (c) {
-                var o = document.createElement('div');
-                o.style.cssText = 'width:44px;height:44px;border-radius:50%;cursor:pointer;border:3px solid ' + (c === color ? '#333' : 'white') + ';box-shadow:0 3px 8px rgba(0,0,0,0.2);background:' + c + ';transform:' + (c === color ? 'scale(1.1)' : 'scale(1)');
-                o.onclick = function () {
-                    var lc = JSON.parse(localStorage.getItem(colorsKey()) || '{}');
-                    lc[key] = c;
-                    localStorage.setItem(colorsKey(), JSON.stringify(lc));
-                    document.getElementById('colorModal').classList.remove('active');
-                    renderSchedule();
-                };
-                picker.appendChild(o);
-            });
-            document.getElementById('colorModal').classList.add('active');
+        async function loadSchedule(name, id, type) {
+            var prefix = type === 'group' ? 'cg' : 'cp';
+            setStatus('Загрузка: ' + name + '...');
+            var html = await fetchProxy(BASE_URL + '/' + prefix + id + '.htm');
+            if (html) {
+                var parsed = parseWeek(html);
+                var result = {};
+                var dayNames = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+                parsed.forEach(function(lesson) {
+                    var parts = lesson.date.split('.');
+                    var d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                    var dayName = dayNames[d.getDay()];
+                    if (!result[dayName]) result[dayName] = [];
+                    result[dayName].push({
+                        time: bells[lesson.pair] || (lesson.pair + ' пара'),
+                        name: lesson.subject,
+                        room: lesson.rooms.join(', ') || '—',
+                        teacher: lesson.teachers.join(', ') || '—'
+                    });
+                });
+                var key = (type === 'group' ? 'kitis_sched_G_' : 'kitis_sched_T_') + name;
+                localStorage.setItem(key, JSON.stringify(result));
+                setStatus('✅ Загружено');
+            } else {
+                setStatus('❌ Ошибка загрузки');
+            }
         }
 
-        // ===== СВАЙП =====
-        var touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
-        function handleSwipe() {
-            var diffX = touchStartX - touchEndX, diffY = touchStartY - touchEndY;
-            if (Math.abs(diffX) < 50 || Math.abs(diffX) < Math.abs(diffY)) return;
-            if (diffX > 0 && currentDay < days.length - 1) currentDay++;
-            else if (diffX < 0 && currentDay > 0) currentDay--;
-            else return;
-            var el = document.getElementById('schedule');
-            el.classList.add('swiping');
-            el.style.transform = diffX > 0 ? 'translateX(-15px)' : 'translateX(15px)';
-            setTimeout(function () { el.style.transform = 'translateX(0)'; el.classList.remove('swiping'); }, 50);
-            renderDaysNav(); renderSchedule(); updateStats();
+        async function refreshData(type) {
+            var btn = document.getElementById(type === 'group' ? 'refreshGroupBtn' : 'refreshTeacherBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Загрузка...';
+            var page = type === 'group' ? 'cg.htm' : 'cp.htm';
+            var prefix = type === 'group' ? 'cg' : 'cp';
+            var html = await fetchProxy(BASE_URL + '/' + page);
+            if (html) {
+                var list = parseList(html, prefix);
+                if (type === 'group') {
+                    groupsData = list;
+                    localStorage.setItem('kitis_groups', JSON.stringify(list));
+                } else {
+                    teachersData = list;
+                    localStorage.setItem('kitis_teachers', JSON.stringify(list));
+                }
+                setStatus('✅ Список загружен: ' + list.length);
+                btn.textContent = '✅ Обновлено!';
+            } else {
+                setStatus('❌ Ошибка');
+                btn.textContent = '❌ Повторить';
+            }
+            renderList(type);
+            setTimeout(function() { btn.textContent = '🔄 Загрузить с сайта КИТИС'; btn.disabled = false; }, 1500);
         }
-        document.addEventListener('touchstart', function (e) { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }, { passive: true });
-        document.addEventListener('touchend', function (e) { touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY; handleSwipe(); }, { passive: true });
 
-        // ===== СТАРТ =====
+        function openModal(type) {
+            renderList(type);
+            document.getElementById(type + 'Modal').classList.add('active');
+        }
+
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').classList.remove('active');
+        }
+
+        document.getElementById('groupBadge').onclick = function() { openModal('group'); };
+        document.getElementById('teacherBadge').onclick = function() { openModal('teacher'); };
+        document.getElementById('closeGroupBtn').onclick = function() { closeModal('group'); };
+        document.getElementById('closeTeacherBtn').onclick = function() { closeModal('teacher'); };
+        document.getElementById('refreshGroupBtn').onclick = function() { refreshData('group'); };
+        document.getElementById('refreshTeacherBtn').onclick = function() { refreshData('teacher'); };
+        document.getElementById('groupSearch').oninput = function() { renderList('group'); };
+        document.getElementById('teacherSearch').oninput = function() { renderList('teacher'); };
+
         updateCurrentTime();
         updateBadges();
         renderDaysNav();
         renderSchedule();
         updateStats();
-        setInterval(function () { updateCurrentTime(); renderSchedule(); }, 60000);
+        setInterval(function() { updateCurrentTime(); renderSchedule(); }, 60000);
 
-        // Автозагрузка списка групп при первом посещении (если кэш пуст)
         if (groupsData.length === 0) {
-            fetchProxy(BASE_URL + '/cg.htm').then(function (html) {
+            fetchProxy(BASE_URL + '/cg.htm').then(function(html) {
                 if (html) {
                     groupsData = parseList(html, 'cg');
                     localStorage.setItem('kitis_groups', JSON.stringify(groupsData));
-                    setStatus('Список групп загружен автоматически ✅');
-                } else {
-                    setStatus('Автозагрузка не удалась — нажми «👥 Группа» → «Загрузить»');
+                    setStatus('✅ Список групп загружен');
                 }
             });
         }
